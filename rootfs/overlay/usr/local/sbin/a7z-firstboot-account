@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${A7Z_FIRSTBOOT_STATE_DIR:-/var/lib/a7z-firstboot}"
+marker="$state_dir/account-initialized"
+
+if [[ -e "$marker" ]]; then
+    echo "Initial account setup is already complete."
+    exit 0
+fi
+if (( EUID != 0 )); then
+    echo "This setup must run as root." >&2
+    exit 1
+fi
+
+umask 077
+while true; do
+    if ! IFS= read -r -p "Create the first sudo account (username): " username; then
+        echo "No username was read; setup will retry on the next boot." >&2
+        exit 1
+    fi
+    if [[ "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
+        break
+    fi
+    echo "Invalid username. Use 1-32 lowercase letters, digits, '_' or '-', starting with a letter or '_'." >&2
+done
+
+if ! getent passwd "$username" >/dev/null; then
+    adduser --disabled-password --gecos "" "$username"
+fi
+echo "Set a password for $username (it is not stored in the image)."
+passwd "$username"
+adduser "$username" sudo
+
+install -d -m 0755 "$state_dir"
+marker_tmp="$(mktemp "$state_dir/.account-initialized.XXXXXX")"
+trap 'rm -f -- "$marker_tmp"' EXIT
+printf 'initialized\n' > "$marker_tmp"
+chmod 0600 "$marker_tmp"
+mv -f -- "$marker_tmp" "$marker"
+trap - EXIT
+echo "Initial account setup complete. The serial login prompt will now start."

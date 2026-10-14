@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.ko binary
+*.bin binary
+*.fex binary
+*.dtb binary
+*.deb binary
+

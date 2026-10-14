@@ -1,0 +1,206 @@
+name: Build A7Z firmware
+
+# 全程在 GitHub 托管 runner 上编译。
+# 取源码：GitLab（Tina SDK，公开 repo 清单）+ Gitee（A7Z 板级补丁）+ GitHub（打包工具/Ubuntu base）。
+# 取大文件：优先用本仓库 Release 里的 tina-a7z-large-files.tar.zst，
+#          没有就自动从 MEGA 下（约 1 GB，仅 3 个项目）。
+# 取基础镜像：本仓库 Release "inputs" 里的 base-sd512-a7z.img.xz（约 104 MB）。
+#
+# 手动触发：Actions → Build A7Z firmware → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_of_large_files:
+        description: 'Where to get the Tina large-file packages'
+        type: choice
+        options: [auto, release, mega]
+        default: auto
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+env:
+  BASE_SHA256: 977EDDFE9F9895D1DD9FFE991C0A9568BCD3B0FAB69F6B509ADE370DA6995EFF
+  UBUNTU_BASE_SHA256: a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2
+  ROOTFS_SIZE: "3946823168"
+  MANIFEST_URL: https://gitlab.com/tina5.0_aiot/manifest.git
+  MANIFEST_REV: refs/tags/aiot-linux-v1.5.0
+  BSP_REPO: https://gitee.com/juping_zheng1/radxa-cubie-a7z-tina-bsp.git
+  PACK_UBOOT_REV: 7f776a209b72b92e8c6a06abc83b1e7597eef5af
+  MEGA_LARGE_FILES: https://mega.nz/folder/hm5m3DhD#whewc4usSeone8jJLtxxaA
+  OUT_NAME: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_uart1_wifi_ntp.img
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          sudo apt-get clean
+          df -h /
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            git python3 rsync xz-utils zstd curl ca-certificates \
+            mtools e2fsprogs dosfstools qemu-user-static binfmt-support \
+            repo megatools
+          sudo update-binfmts --enable qemu-aarch64 || true
+          test -e /proc/sys/fs/binfmt_misc/qemu-aarch64
+          df -h /
+
+      # ---------------------------------------------------------------- SDK
+      - name: Sync Tina SDK (public GitLab manifest)
+        run: |
+          set -Eeuo pipefail
+          ./scripts/fetch-sdk.sh tina-sdk 2>&1 | tail -40
+          du -sh tina-sdk
+
+      - name: Fetch Tina large-file packages
+        run: |
+          set -Eeuo pipefail
+          MODE="${{ inputs.source_of_large_files || 'auto' }}"
+          mkdir -p /tmp/large-files
+          got=0
+          if [[ "$MODE" == "auto" || "$MODE" == "release" ]]; then
+            URL="${{ github.server_url }}/${{ github.repository }}/releases/download/inputs/tina-a7z-large-files.tar.zst"
+            if curl -fsIL "$URL" >/dev/null 2>&1; then
+              echo "==> large files from repo Release"
+              curl -fL --retry 3 -o /tmp/lf.tar.zst "$URL"
+              tar --zstd -xf /tmp/lf.tar.zst -C /tmp/large-files
+              got=1
+            elif [[ "$MODE" == "release" ]]; then
+              echo "ERROR: tina-a7z-large-files.tar.zst missing from release 'inputs'" >&2
+              exit 1
+            fi
+          fi
+          if [[ "$got" -eq 0 ]]; then
+            echo "==> large files from MEGA (only 3 projects, ~1 GB)"
+            megals --reload "$MEGA_LARGE_FILES" > /tmp/mega-list.txt || true
+            grep -E 'lichee/arisc|prebuilt/kernel-built/aarch64|brandy-2.0/tools' /tmp/mega-list.txt \
+              | tee /tmp/mega-need.txt
+            while read -r path; do
+              [[ -n "$path" ]] || continue
+              echo "  downloading $path"
+              megadl --path /tmp/mega-dl/ "$path"
+            done < /tmp/mega-need.txt
+            find /tmp/mega-dl -name 'aiot-linux-v1.5.0-large-files.tar.zst' -exec \
+              sh -c 'd=$(dirname "$1"); tar --zstd -xf "$1" -C "$d"' _ {} \;
+            got=1
+          fi
+          echo "==> restoring large files into the SDK"
+          LARGE_FILES_DIR=$(find /tmp/large-files /tmp/mega-dl -maxdepth 6 -type d -name 'tina5.0_aiot' 2>/dev/null | head -1)
+          [[ -n "$LARGE_FILES_DIR" ]] || { echo "ERROR: large-files tree not found"; exit 1; }
+          du -sh "$LARGE_FILES_DIR"
+          ./scripts/restore-large-files.sh tina-sdk "$LARGE_FILES_DIR"
+
+      # ------------------------------------------------------- SDK-derived parts
+      - name: Build SCP firmware / DTB / AIC WiFi modules
+        run: sudo ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
+
+      # ------------------------------------------------------------- rootfs
+      - name: Fetch base SD image from Release
+        run: |
+          set -Eeuo pipefail
+          mkdir -p cache out work
+          curl -fL --retry 3 -o cache/base.img.xz \
+            "${{ github.server_url }}/${{ github.repository }}/releases/download/inputs/base-sd512-a7z.img.xz"
+          xz -t cache/base.img.xz
+          xz -dkf cache/base.img.xz
+          echo "$BASE_SHA256  cache/base.img" | sha256sum -c -
+
+      - name: Mount vendor root (base p3, read-only)
+        run: |
+          set -Eeuo pipefail
+          mkdir -p work/vendor
+          LOOP=$(sudo losetup -f --show -o $((679936*512)) cache/base.img)
+          echo "LOOP=$LOOP" >> "$GITHUB_ENV"
+          sudo mount -o ro "$LOOP" work/vendor
+
+      - name: Fetch Ubuntu Base 24.04.5 arm64
+        run: |
+          set -Eeuo pipefail
+          F=cache/ubuntu-base-24.04.5-base-arm64.tar.gz
+          [[ -f $F ]] || curl -fL --retry 3 -o "$F" \
+            https://cdimage.ubuntu.com/ubuntu-base/releases/24.04.5/release/ubuntu-base-24.04.5-base-arm64.tar.gz
+          echo "$UBUNTU_BASE_SHA256  $F" | sha256sum -c -
+
+      - name: Build Ubuntu 24.04 rootfs
+        run: |
+          set -Eeuo pipefail
+          sudo -E ./rootfs/build_ubuntu24_rootfs.sh \
+            --work-dir "$PWD/work/rootfs" \
+            --base-tarball "$PWD/cache/ubuntu-base-24.04.5-base-arm64.tar.gz" \
+            --base-sha256 "$UBUNTU_BASE_SHA256" \
+            --vendor-root "$PWD/work/vendor" \
+            --out-ext4 "$PWD/out/rootfs.ext4" \
+            --size-bytes "$ROOTFS_SIZE"
+          sudo ./rootfs/verify_rootfs.sh "$PWD/out/rootfs.ext4" "$PWD/work/vendor"
+
+      - name: Apply WiFi / NTP / timezone overlay
+        run: sudo ./scripts/apply_extra_overlay.sh "$PWD/out/rootfs.ext4" "$PWD/overlay"
+
+      - name: Unmount vendor root
+        if: always()
+        run: |
+          set +e
+          mountpoint -q work/vendor && sudo umount -l work/vendor
+          [[ -n "${LOOP:-}" ]] && sudo losetup -d "$LOOP"
+          sudo losetup -D 2>/dev/null
+          true
+
+      # ------------------------------------------------------------ assemble
+      - name: Compose 4 GiB image
+        run: |
+          set -Eeuo pipefail
+          python3 rootfs/compose_a7z_ubuntu_image.py \
+            --base cache/base.img \
+            --rootfs-ext4 out/rootfs.ext4 \
+            --out "out/$OUT_NAME"
+
+      - name: Patch boot package + p2 DTB
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/patch_image_boot.py \
+            --image "out/$OUT_NAME" \
+            --boot-package boot/boot_package_uart1.fex \
+            --dtb dtb/sunxi-uart1.dtb \
+            --report out/boot-patch.json
+
+      - name: Verify
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/verify-radxa-img.py "out/$OUT_NAME" 512 | tail -25
+          LOOP=$(sudo losetup -f --show -o $((679936*512)) "out/$OUT_NAME")
+          sudo e2fsck -fn "$LOOP" && echo "e2fsck: clean"
+          sudo losetup -d "$LOOP"
+          sha256sum "out/$OUT_NAME" | tee "out/$OUT_NAME.sha256"
+
+      - name: Compress
+        run: |
+          set -Eeuo pipefail
+          xz -T0 -6 -c "out/$OUT_NAME" > "out/$OUT_NAME.xz"
+          xz -t "out/$OUT_NAME.xz"
+          sha256sum "out/$OUT_NAME.xz" | tee "out/$OUT_NAME.xz.sha256"
+          ls -lh out
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: a7z-firmware-${{ github.run_number }}
+          path: |
+            out/*.img.xz
+            out/*.sha256
+            out/boot-patch.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30

@@ -1,0 +1,16 @@
+[connection]
+id=A7Z wired DHCP
+uuid=ef617f55-4f37-4260-91ea-f3375d7b6b44
+type=ethernet
+autoconnect=true
+
+[ethernet]
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]

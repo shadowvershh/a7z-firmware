@@ -1,0 +1,11 @@
+work/
+out/
+cache/
+sdk-parts-work/
+*.img
+*.img.xz
+*.sha256
+!*.sha256
+__pycache__/
+*.pyc
+

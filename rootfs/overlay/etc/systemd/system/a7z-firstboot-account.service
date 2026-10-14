@@ -1,0 +1,21 @@
+[Unit]
+Description=Create the initial A7Z headless administrator on serial console
+After=local-fs.target
+Before=serial-getty@ttyAS0.service
+ConditionPathExists=!/var/lib/a7z-firstboot/account-initialized
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/a7z-firstboot-account
+StandardInput=tty-force
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyAS0
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=no
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
