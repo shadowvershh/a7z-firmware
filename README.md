@@ -6,6 +6,7 @@
 
 - RISC-V **E902/SCP UART1 直出日志**（S-UART1：排针 37/33 脚，115200 8N1）
 - **AIC8800D80 USB WiFi** 驱动 + USB 专用固件
+- **VE 硬件视频引擎 + PowerVR OpenCL/Vulkan**（`libvdecoder`/`libVE`/`libPVROCL`/`libVK_IMG`）
 - **USB-C 口完整可用**：ET7304 TCPC 驱动 + `try-power-role=source`（USB hub / UVC 摄像头 / HDMI 转接器）
 - **systemd-timesyncd** + 中国 NTP + `Asia/Shanghai` 时区
 - PowerVR GPU / NPU 运行时、`nmtui`、USTC APT 源、串口免密登录（`radxa/radxa`）
@@ -96,6 +97,7 @@ scripts/
   patch_a7z_e902_uart1_staging.py   ARISC UART1 后端改动
   patch_a7z_uart1_dts.py            DTS 引脚改 PM4/PM5
   patch_a7z_typec_role.py           DTS：USB-C try-power-role sink→source
+  install_media_libs.sh             从 SDK 提取 VE/OpenCL/Vulkan 库到 overlay
   build_a7z_uart1_boot_package.py   重打启动包
   roundtrip_a7z_boot_package.py     启动包往返自检
   patch_image_boot.py               写启动包槽 + 替换 p2 DTB
@@ -146,6 +148,25 @@ HDMI 转接器（DP alt mode）均可枚举，摄像头可出图。
 SD 槽是 `4020000.sdmmc`，DTS 带 `cd-gpios`，驱动进 `detmode:gpio irq`（带消抖），
 支持热插拔。**前提是系统不是从这张 SD 启动的**——把固件刷进 UFS 后，SD 就是纯数据槽：
 插卡自动出现 `/dev/mmcblk1` 及分区，拔卡设备消失。
+
+---
+
+## 七、多媒体 / GPU 运行时（VE + OpenCL + Vulkan）
+
+A733 的 VE（硬件视频引擎）和 PowerVR OpenCL/Vulkan 用户态**都在 SDK 里**，
+但标准 Ubuntu rootfs 不含它们 —— 板子开箱既没有 OpenCL 也没有硬解。
+`scripts/install_media_libs.sh` 会在构建时把它们从 SDK 提取到 `overlay/usr/local/lib`，
+再由 `apply_extra_overlay.sh` 装进 rootfs（这些 vendor blob 约 59 MB，已 git-ignore）。
+
+| 组件 | 库 | 说明 |
+|---|---|---|
+| VE 硬解 | `libvdecoder` `libVE` `libMemAdapter` `libcdc_base` `libfbm` `libsbm` `libvideoengine` + 32 个 `libaw*` 插件 | `/dev/cedar_dev`；`/etc/cedarx.conf`、`/etc/cedarc.conf` |
+| OpenCL | `libPVROCL.so.24.2.6603887` → `libOpenCL.so{.1}` + `/etc/OpenCL/vendors/pvr.icd` | PowerVR BXM-4-64，OpenCL 3.0（实现了 ICD 接口，走标准 loader） |
+| Vulkan | `libVK_IMG.so.24.2.6603887`（依赖 `libufwriter`） | |
+| GPU 附加 | `libPVRScopeServices` `libsutu_display` | |
+
+实测：`clGetPlatformIDs` 返回 1 个平台 `PowerVR / OpenCL 3.0`，设备 `PowerVR B-Series BXM-4-64`。
+GPU 调频 `/sys/class/devfreq/1800000.gpu`：400 / 600 / 800 / **1008 MHz**。
 
 ---
 

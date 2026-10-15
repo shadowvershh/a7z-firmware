@@ -43,4 +43,11 @@ else
     depmod -b "$MNT" 6.6.98
 fi
 
+# 5) refresh the dynamic linker cache (VE / OpenCL / Vulkan libs live in /usr/local/lib)
+if [[ -x "$MNT/usr/sbin/ldconfig" ]]; then
+    chroot "$MNT" ldconfig || true
+else
+    ldconfig -r "$MNT" || true
+fi
+
 echo "extra overlay applied to $ROOTFS_EXT4"
