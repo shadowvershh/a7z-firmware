@@ -104,7 +104,7 @@ jobs:
           ./scripts/restore-large-files.sh tina-sdk "$LARGE_FILES_DIR"
 
       # ------------------------------------------------------- SDK-derived parts
-      - name: Build SCP firmware / DTB / AIC WiFi modules
+      - name: Build SCP firmware / DTB / AIC WiFi + ET7304 modules
         run: sudo ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
       # ------------------------------------------------------------- rootfs

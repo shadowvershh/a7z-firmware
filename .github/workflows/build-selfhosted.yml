@@ -12,7 +12,7 @@ on:
         default: '/home/ubuntu/Desktop/radxa_a7z/tina-sdk'
         type: string
       rebuild_sdk_parts:
-        description: 'Rebuild SCP boot package / DTB / AIC modules from the SDK first'
+        description: 'Rebuild SCP boot package / DTB / AIC + ET7304 modules from the SDK first'
         required: false
         default: false
         type: boolean
@@ -53,7 +53,7 @@ jobs:
           echo "SDK=$SDK" >> "$GITHUB_ENV"
           df -h .
 
-      - name: Rebuild SDK-derived parts (optional)
+      - name: Rebuild SDK-derived parts (SCP/DTB/AIC/ET7304, optional)
         if: ${{ inputs.rebuild_sdk_parts }}
         run: sudo ./scripts/build-sdk-parts.sh "$SDK"
 

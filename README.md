@@ -6,6 +6,7 @@
 
 - RISC-V **E902/SCP UART1 直出日志**（S-UART1：排针 37/33 脚，115200 8N1）
 - **AIC8800D80 USB WiFi** 驱动 + USB 专用固件
+- **USB-C 口完整可用**：ET7304 TCPC 驱动 + `try-power-role=source`（USB hub / UVC 摄像头 / HDMI 转接器）
 - **systemd-timesyncd** + 中国 NTP + `Asia/Shanghai` 时区
 - PowerVR GPU / NPU 运行时、`nmtui`、USTC APT 源、串口免密登录（`radxa/radxa`）
 
@@ -91,18 +92,21 @@ scripts/
   fetch-sdk.sh                 repo init/sync + A7Z 板级补丁
   restore-large-files.sh       按 manifest 还原大文件
   make-large-files-bundle.sh   打 ~1 GB 大文件包（本地跑一次）
-  build-sdk-parts.sh           编 SCP / DTB / AIC 模块
+  build-sdk-parts.sh           编 SCP / DTB / AIC + ET7304 模块
   patch_a7z_e902_uart1_staging.py   ARISC UART1 后端改动
   patch_a7z_uart1_dts.py            DTS 引脚改 PM4/PM5
+  patch_a7z_typec_role.py           DTS：USB-C try-power-role sink→source
   build_a7z_uart1_boot_package.py   重打启动包
   roundtrip_a7z_boot_package.py     启动包往返自检
   patch_image_boot.py               写启动包槽 + 替换 p2 DTB
   apply_extra_overlay.sh            往 rootfs 灌 WiFi/NTP/时区
   verify-radxa-img.py               Radxa GPT 校验
+drivers/         tcpci_et7304.c（ET7304 USB-C TCPC 驱动源码）
 rootfs/          Ubuntu 24.04 rootfs 构建器 + overlay + 清单 + 单测
-overlay/         AIC WiFi 模块 + USB 固件 + systemd-timesyncd + NTP
+overlay/         AIC WiFi/ET7304 模块 + USB 固件 + systemd-timesyncd + NTP
+overlay/boot/    sunxi.dtb（rootfs /boot 同步用；真正启动的是 p2 那份）
 boot/            boot_package_uart1.fex（含 UART1 SCP）
-dtb/             sunxi-uart1.dtb
+dtb/             sunxi-uart1.dtb（UART1 引脚 + USB-C 角色修正）
 inputs/          systemd-timesyncd deb + Release 说明
 ```
 
@@ -122,7 +126,30 @@ sudo ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
 ---
 
-## 六、安全边界
+## 六、USB-C 口与存储
+
+### USB-C（ET7304）
+板子的 USB-C 口由 **ET7304 TCPC** 管，但 SDK 内核里**没有它的驱动**，且 vendor 的
+board.dts 把 connector 标成了 `try-power-role = "sink"`（TCPM 会呈现 Rd，永远发现不了同为
+sink 的 hub）。本仓库补了两处：
+
+1. `drivers/tcpci_et7304.c` → `overlay/usr/lib/modules/6.6.98/tcpci_et7304.ko`
+   （自动加载：`overlay/etc/modules-load.d/et7304.conf`），负责外部 VBUS 稳压器
+   （`usb2-vbus` = GPIO PL2）和 `et7304,intr_gpio`（PL3）中断；
+2. `scripts/patch_a7z_typec_role.py` 把 `try-power-role` 改成 `source`，
+   随 `dtb/sunxi-uart1.dtb` 一起写进 **p2 `/sunxi.dtb`**（u-boot 实际加载的那份）。
+
+实测：hub（USB2.1 + USB3.1 双口）、UVC 摄像头（4K MJPG，`uvcvideo`）、
+HDMI 转接器（DP alt mode）均可枚举，摄像头可出图。
+
+### SD 卡热插拔
+SD 槽是 `4020000.sdmmc`，DTS 带 `cd-gpios`，驱动进 `detmode:gpio irq`（带消抖），
+支持热插拔。**前提是系统不是从这张 SD 启动的**——把固件刷进 UFS 后，SD 就是纯数据槽：
+插卡自动出现 `/dev/mmcblk1` 及分区，拔卡设备消失。
+
+---
+
+## 七、安全边界
 
 - 只操作 SD 镜像，**不碰 UFS**。
 - 生成的镜像保留 SD GPT 布局与 PARTUUID，`p1`/`boot0`/启动包槽以外的引导区不被改动。

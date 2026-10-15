@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Rebuild the three SDK-derived firmware pieces from a synced Tina SDK:
+# Rebuild the SDK-derived firmware pieces from a synced Tina SDK:
 #   boot/boot_package_uart1.fex   (SCP with UART1 logging, repacked)
-#   dtb/sunxi-uart1.dtb           (arisc S-UART1 = PM4/PM5, function 5)
+#   dtb/sunxi-uart1.dtb           (arisc S-UART1 = PM4/PM5; USB-C try-power-role=source)
 #   overlay/usr/lib/modules/6.6.98/aic8800_{bsp,fdrv,btusb}.ko
+#   overlay/usr/lib/modules/6.6.98/tcpci_et7304.ko  (ET7304 USB-C TCPC driver)
 #
 # Usage: build-sdk-parts.sh /path/to/tina-sdk
 set -Eeuo pipefail
@@ -25,7 +26,7 @@ done
 mkdir -p "$WORK" "$REPO/boot" "$REPO/dtb" "$REPO/overlay/usr/lib/modules/6.6.98"
 
 # ---------------------------------------------------------------- 1) ARISC/SCP
-echo "==> [1/4] ARISC/SCP (UART1)"
+echo "==> [1/5] ARISC/SCP (UART1)"
 mkdir -p "$WORK/arisc/brandy/arisc" "$WORK/arisc/device/config/chips/a733/configs"
 rm -rf "$WORK/arisc/brandy/arisc/ar100s" "$WORK/arisc/device/config/chips/a733/configs/cubie_a7z"
 cp -a "$ARISC_SRC" "$WORK/arisc/brandy/arisc/"
@@ -43,7 +44,7 @@ strings -a "$SCP_BIN" | grep -q 'E902_S_UART1_READY baud=115200' \
 echo "    scp.bin: $(stat -c %s "$SCP_BIN") bytes"
 
 # ------------------------------------------------------- 2) boot package repack
-echo "==> [2/4] repack boot package"
+echo "==> [2/5] repack boot package"
 PACK_TOOLS="$WORK/orangepi-build/external/packages/pack-uboot"
 if [[ ! -d "$PACK_TOOLS" ]]; then
     rm -rf "$WORK/orangepi-build"
@@ -66,11 +67,12 @@ cp -f "$WORK/package/boot_package_uart1.fex" "$REPO/boot/boot_package_uart1.fex"
 echo "    boot package: $(stat -c %s "$REPO/boot/boot_package_uart1.fex") bytes"
 
 # ------------------------------------------------------------------- 3) DTB
-echo "==> [3/4] DTB (S-UART1 pins)"
+echo "==> [3/5] DTB (S-UART1 pins)"
 DTS_DIR="$WORK/dts"
 rm -rf "$DTS_DIR"; mkdir -p "$DTS_DIR"
 cp -a "$BOARD/linux-6.6/board.dts" "$DTS_DIR/board.dts"
 python3 "$REPO/scripts/patch_a7z_uart1_dts.py" "$DTS_DIR/board.dts"
+python3 "$REPO/scripts/patch_a7z_typec_role.py" "$DTS_DIR/board.dts"
 cpp -nostdinc -I"$DTS_DIR" -I"$KSRC/bsp/configs/linux-6.6" -I"$KSRC/bsp/include" \
     -I"$KSRC/include" -undef -D__DTS__ -x assembler-with-cpp \
     "$DTS_DIR/board.dts" > "$DTS_DIR/board.pp.dts"
@@ -86,9 +88,13 @@ if total > 24 * 8192:
     raise SystemExit("ERROR: DTB exceeds the p2 24-cluster chain")
 PY
 cp -f "$DTS_DIR/sunxi.dtb" "$REPO/dtb/sunxi-uart1.dtb"
+# u-boot actually boots the p2 FAT copy (patch_image_boot.py writes it);
+# keep the rootfs /boot copy in sync through the overlay as well.
+mkdir -p "$REPO/overlay/boot"
+cp -f "$DTS_DIR/sunxi.dtb" "$REPO/overlay/boot/sunxi.dtb"
 
 # ------------------------------------------------------- 4) AIC WiFi modules
-echo "==> [4/4] AIC8800 USB kernel modules"
+echo "==> [4/5] AIC8800 USB kernel modules"
 AIC="$WORK/aic8800"
 rm -rf "$AIC"; mkdir -p "$AIC"
 cp -a "$KSRC/bsp/drivers/net/wireless/aic8800" "$AIC/"
@@ -109,7 +115,19 @@ for m in bsp fdrv btusb; do
 done
 echo "    modules: $(ls "$REPO/overlay/usr/lib/modules/6.6.98/" | tr '\n' ' ')"
 
+# ------------------------------------------------- 5) ET7304 USB-C TCPC
+echo "==> [5/5] ET7304 USB-C TCPC module"
+ET="$WORK/et7304"
+rm -rf "$ET"; mkdir -p "$ET"
+cp "$REPO/drivers/tcpci_et7304.c" "$ET/"
+printf 'obj-m := tcpci_et7304.o\n' > "$ET/Makefile"
+make -C "$KBUILD" ARCH=arm64 CROSS_COMPILE="$TC" M="$ET" modules >/dev/null
+cp -f "$ET/tcpci_et7304.ko" "$REPO/overlay/usr/lib/modules/6.6.98/"
+echo "    tcpci_et7304.ko: $(stat -c %s "$REPO/overlay/usr/lib/modules/6.6.98/tcpci_et7304.ko") bytes"
+
 echo "==> done. Update these repo files and commit:"
 echo "    boot/boot_package_uart1.fex"
 echo "    dtb/sunxi-uart1.dtb"
+echo "    overlay/boot/sunxi.dtb"
 echo "    overlay/usr/lib/modules/6.6.98/aic8800_*.ko"
+echo "    overlay/usr/lib/modules/6.6.98/tcpci_et7304.ko"
