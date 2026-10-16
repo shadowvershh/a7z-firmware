@@ -24,6 +24,12 @@ for p in "$ARISC_SRC" "$KSRC" "$BOARD" "$KBUILD/Module.symvers" "${TC}gcc"; do
 done
 [[ -f "$KBUILD/.config" ]] || { echo "ERROR: kernel build tree not configured ($KBUILD/.config)"; exit 1; }
 
+# 大文件包里的 O= 内核构建树烘焙了打包机的绝对路径（mkmakefile 生成的 wrapper 等），
+# 还原后统一改写为当前机器的 SDK 路径，否则 M= 模块编译找不到内核源码树。
+grep -rIl '/Desktop/radxa_a7z/tina-sdk' "$KBUILD" 2>/dev/null | while read -r f; do
+    sed -i "s|/home/[^/\"']*Desktop/radxa_a7z/tina-sdk|$SDK|g" "$f"
+done
+
 mkdir -p "$WORK" "$REPO/boot" "$REPO/dtb" "$REPO/overlay/usr/lib/modules/6.6.98"
 
 # ---------------------------------------------------------------- 1) ARISC/SCP
