@@ -145,7 +145,11 @@ echo "    tcpci_et7304.ko: $(stat -c %s "$REPO/overlay/usr/lib/modules/6.6.98/tc
 
 # -------------------------------------------- 6) VE / OpenCL / GPU userspace
 echo "==> [6/6] VE (cedarc) + PowerVR OpenCL/Vulkan libraries"
-"$REPO/scripts/install_media_libs.sh" "$SDK" "$REPO"
+if ls "$REPO/overlay/usr/local/lib"/libVE*.so* >/dev/null 2>&1; then
+    echo "    media libs already staged in repo overlay - skipping SDK extraction"
+else
+    "$REPO/scripts/install_media_libs.sh" "$SDK" "$REPO"
+fi
 
 echo "==> done. Update these repo files and commit:"
 echo "    boot/boot_package_uart1.fex"
