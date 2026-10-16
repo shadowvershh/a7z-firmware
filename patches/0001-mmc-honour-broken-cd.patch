@@ -1,0 +1,42 @@
+From 4be7d428ae6306efff2863e1f7efecee3394ab18 Mon Sep 17 00:00:00 2001
+From: a7z <a7z@local>
+Date: Fri, 16 Oct 2026 14:41:43 +0800
+Subject: [PATCH] mmc: honour standard broken-cd property (enable
+ MMC_CAP_NEEDS_POLL)
+
+The vendor driver never sets MMC_CAP_NEEDS_POLL, so the MMC core always
+registers a cd-gpios IRQ.  On Cubie A7Z the pinctrl only delivers one
+edge direction for the SD card-detect pin, so card insertion is never
+noticed.  Set MMC_CAP_NEEDS_POLL when the DTS has broken-cd, which makes
+the core poll mmc_gpio_get_cd() and detect both insertion and removal.
+---
+ drivers/mmc/sunxi-mmc.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/drivers/mmc/sunxi-mmc.c b/drivers/mmc/sunxi-mmc.c
+index 0e4f5844..14406042 100644
+--- a/drivers/mmc/sunxi-mmc.c
++++ b/drivers/mmc/sunxi-mmc.c
+@@ -4172,6 +4172,19 @@ static int sunxi_mmc_extra_of_parse(struct mmc_host *mmc)
+ 	if (of_property_read_bool(np, "data3-detect"))
+ 		host->sunxi_caps3 |= MMC_SUNXI_CAP3_DAT3_DET;
+ 
++	/*
++	 * sunxi: honour the standard "broken-cd" property.
++	 *
++	 * The vendor driver never sets MMC_CAP_NEEDS_POLL, so the MMC core
++	 * always registers a cd-gpios IRQ.  On this board the pinctrl only
++	 * delivers one edge direction for that pin, so insertion is never
++	 * noticed.  With MMC_CAP_NEEDS_POLL set here (before mmc_add_host),
++	 * the core skips the IRQ and polls mmc_gpio_get_cd() instead, which
++	 * detects both insertion and removal.
++	 */
++	if (of_property_read_bool(np, "broken-cd"))
++		mmc->caps |= MMC_CAP_NEEDS_POLL;
++
+ 	if (of_property_read_bool(np, "cqe-on")) {
+ 		host->sunxi_caps3 |= MMC_SUNXI_CQE_ON;
+ 		if (of_property_read_bool(np, "int-clsc-on"))
+-- 
+2.34.1
+
