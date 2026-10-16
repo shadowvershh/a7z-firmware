@@ -20,6 +20,8 @@ PROJECTS=(
   "brandy/arisc"                              # RISC-V toolchain -> SCP firmware
   "prebuilt/kernelbuilt/aarch64"              # AArch64 toolchain -> kernel modules
   "brandy/brandy-2.0/tools"                   # boot0/boot-package pack tools
+  "out/a733/kernel/build"                     # 已构建的内核 O= 树（.config/Module.symvers/scripts）-> 外部模块编译
+  "out/toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu"  # build-sdk-parts.sh 期望的交叉工具链
 )
 
 TMP=$(mktemp -d)
