@@ -140,7 +140,8 @@ jobs:
 
       # ------------------------------------------------------- SDK-derived parts
       - name: Build SCP firmware / DTB / AIC WiFi + ET7304 modules
-        run: sudo ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
+        # sudo -E: 保留 BASELINE_BOOT_PACKAGE 等环境变量（sudo 默认会丢弃）
+        run: sudo -E ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
       # ------------------------------------------------------------- rootfs
       - name: Fetch base image from Release (SD)
