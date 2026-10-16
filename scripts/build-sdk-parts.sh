@@ -106,7 +106,10 @@ cp -f "$DTS_DIR/sunxi.dtb" "$REPO/overlay/boot/sunxi.dtb"
 echo "==> [4/6] AIC8800 USB kernel modules"
 AIC="$WORK/aic8800"
 rm -rf "$AIC"; mkdir -p "$AIC"
-cp -a "$KSRC/bsp/drivers/net/wireless/aic8800" "$AIC/"
+# GitLab v1.5.0 内核仓库不含 bsp/，vendor 驱动（aic8800 等）在顶层 lichee/bsp 仓库
+AIC_SRC="$SDK/bsp/drivers/net/wireless/aic8800"
+[[ -d "$AIC_SRC" ]] || AIC_SRC="$KSRC/bsp/drivers/net/wireless/aic8800"   # 本地 v1.4.6 布局回退
+cp -a "$AIC_SRC" "$AIC/"
 export ARCH=arm64 CROSS_COMPILE="$TC"
 make -C "$KBUILD" M="$AIC/aic8800/aic8800_bsp" \
      CONFIG_AIC_WLAN_SUPPORT=y CONFIG_AIC_INTF_USB=y CONFIG_AIC_INTF_SDIO=n \
