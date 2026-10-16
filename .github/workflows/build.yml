@@ -76,7 +76,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             git python3 rsync xz-utils zstd curl ca-certificates \
             mtools e2fsprogs dosfstools qemu-user-static binfmt-support \
-            repo megatools
+            repo megatools gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf picolibc-riscv64-unknown-elf
           sudo update-binfmts --enable qemu-aarch64 || true
           test -e /proc/sys/fs/binfmt_misc/qemu-aarch64
           df -h /
