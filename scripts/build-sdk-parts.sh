@@ -73,13 +73,17 @@ DTS_DIR="$WORK/dts"
 rm -rf "$DTS_DIR"; mkdir -p "$DTS_DIR"
 cp -a "$BOARD/linux-6.6/board.dts" "$DTS_DIR/board.dts"
 python3 "$REPO/scripts/patch_a7z_uart1_dts.py" "$DTS_DIR/board.dts"
-python3 "$REPO/scripts/patch_a7z_typec_role.py" "$DTS_DIR/board.dts"
-cpp -nostdinc -I"$DTS_DIR" -I"$KSRC/bsp/configs/linux-6.6" -I"$KSRC/bsp/include" \
-    -I"$KSRC/include" -undef -D__DTS__ -x assembler-with-cpp \
-    "$DTS_DIR/board.dts" > "$DTS_DIR/board.pp.dts"
-ORIG_SZ=$(mktemp -d)  # reference size comes from the baseline image, see docs
-dtc -@ -W no-unit_address_vs_reg -I dts -O dtb -o "$DTS_DIR/sunxi.dtb" "$DTS_DIR/board.pp.dts"
-python3 - "$DTS_DIR/sunxi.dtb" <<'PY'
+# v1.5.0 + gitee BSP 的 linux-6.6 board.dts 没有 USB-C connector 节点
+# (try-power-role 只在 gitee 的 5.15 版) -> 回退到仓库提交的、板上验证过的 sunxi-uart1.dtb
+BUILD_DTB=1
+if ! python3 "$REPO/scripts/patch_a7z_typec_role.py" "$DTS_DIR/board.dts"; then
+    BUILD_DTB=0
+fi
+if [[ "$BUILD_DTB" == "1" ]]; then
+    cpp -nostdinc -I"$DTS_DIR" -I"$KSRC/bsp/configs/linux-6.6" -I"$KSRC/bsp/include"         -I"$KSRC/include" -undef -D__DTS__ -x assembler-with-cpp         "$DTS_DIR/board.dts" > "$DTS_DIR/board.pp.dts"
+    ORIG_SZ=$(mktemp -d)  # reference size comes from the baseline image, see docs
+    dtc -@ -W no-unit_address_vs_reg -I dts -O dtb -o "$DTS_DIR/sunxi.dtb" "$DTS_DIR/board.pp.dts"
+    python3 - "$DTS_DIR/sunxi.dtb" <<'PY'
 import struct, sys
 p = sys.argv[1]
 b = open(p, "rb").read()
@@ -88,6 +92,10 @@ print(f"    dtb {len(b)} bytes (totalsize {total})")
 if total > 24 * 8192:
     raise SystemExit("ERROR: DTB exceeds the p2 24-cluster chain")
 PY
+else
+    echo "  (source DTS lacks connector node -> using committed verified DTB)"
+    cp -f "$REPO/dtb/sunxi-uart1.dtb" "$DTS_DIR/sunxi.dtb"
+fi
 cp -f "$DTS_DIR/sunxi.dtb" "$REPO/dtb/sunxi-uart1.dtb"
 # u-boot actually boots the p2 FAT copy (patch_image_boot.py writes it);
 # keep the rootfs /boot copy in sync through the overlay as well.
