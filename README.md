@@ -175,3 +175,18 @@ GPU 调频 `/sys/class/devfreq/1800000.gpu`：400 / 600 / 800 / **1008 MHz**。
 - 只操作 SD 镜像，**不碰 UFS**。
 - 生成的镜像保留 SD GPT 布局与 PARTUUID，`p1`/`boot0`/启动包槽以外的引导区不被改动。
 - 默认账号 `radxa/radxa`（弱口令），连公网前请先改密码。
+
+---
+
+## 五、SD / UFS 双介质
+
+workflow 以 matrix 同时产出两个固件（Artifacts 里分别带 `sd512` / `ufs4096` 后缀）：
+
+| | SD 版 | UFS 版 |
+|---|---|---|
+| 基底（Release `inputs`） | `base-sd512-a7z.img.xz`（2 GiB，512 B 扇区） | `base-ufs4096-v2.img.xz`（10 GiB，4096 B 扇区，板上已验证） |
+| 引导处理 | 重打 `boot_package_uart1.fex` + p2 DTB 补丁 | **保留基底引导不动**（boot0_ufs 串口静默，boot blob @ 字节 1056768） |
+| rootfs | 新构建 Ubuntu 24.04，扩到 4 GiB | 同一份新构建 rootfs，dd 进 p3 后 `resize2fs` 扩满 |
+| 刷写 | xz -dc \| dd of=/dev/sdX | xz -dc \| dd of=/dev/sdX bs=4M（UFS 容量按需 `growpart` + `resize2fs`） |
+
+UFS 版 rootfs 内容与 SD 版完全一致（同一份 overlay 与校验流程）。
