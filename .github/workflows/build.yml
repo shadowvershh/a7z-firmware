@@ -143,6 +143,12 @@ jobs:
         # sudo -E: 保留 BASELINE_BOOT_PACKAGE 等环境变量（sudo 默认会丢弃）
         run: sudo -E ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
+      # 释放磁盘：SDK 源码在编完模块后不再需要（必须在取 base 镜像之前，否则 rootfs/UFS 阶段磁盘耗尽）
+      - name: Free disk space (post SDK)
+        run: |
+          rm -rf tina-sdk work/sdk-parts-work /tmp/large-files /tmp/lf.tar.zst
+          df -h /
+
       # ------------------------------------------------------------- rootfs
       - name: Fetch base image from Release (SD)
         if: matrix.target == 'sd'
@@ -208,12 +214,6 @@ jobs:
           [[ -n "${LOOP:-}" ]] && sudo losetup -d "$LOOP"
           sudo losetup -D 2>/dev/null
           true
-
-      # 释放磁盘：SDK 源码在编完模块后不再需要
-      - name: Free disk space (post SDK)
-        run: |
-          rm -rf tina-sdk work/sdk-parts-work /tmp/large-files /tmp/lf.tar.zst
-          df -h /
 
       # ------------------------------------------------------------ assemble
       - name: Compose 4 GiB image (SD)
