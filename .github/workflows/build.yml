@@ -40,6 +40,8 @@ env:
   # UFS 基底 v2：10 GiB，4096 B 逻辑扇区，boot blob @ 字节 1056768，板上已验证。
   # p3 起始字节两种介质相同（332 MiB = 679936 × 512）。
   UFS_BASE_IMG: cache/base-ufs.img
+  # vendor 基准 boot 包（Radxa deb 提取，SHA ACAA783A…），build_a7z_uart1_boot_package.py 的 roundtrip 基线
+  BASELINE_BOOT_PACKAGE: ${{ github.workspace }}/boot/boot_package_baseline.fex
 
 jobs:
   build:
