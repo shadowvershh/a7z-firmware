@@ -120,10 +120,19 @@ jobs:
             got=1
           fi
           echo "==> restoring large files into the SDK"
-          LARGE_FILES_DIR=$(find /tmp/large-files /tmp/mega-dl -maxdepth 6 -type d -name 'tina5.0_aiot' 2>/dev/null | head -1)
-          [[ -n "$LARGE_FILES_DIR" ]] || { echo "ERROR: large-files tree not found"; exit 1; }
-          du -sh "$LARGE_FILES_DIR"
-          ./scripts/restore-large-files.sh tina-sdk "$LARGE_FILES_DIR"
+          # Release 包布局: tina-a7z-large-files/<checkout路径>/...（与 SDK 内路径一致，直接复制）
+          BUNDLE_DIR=$(find /tmp/large-files -maxdepth 2 -type d -name 'tina-a7z-large-files' 2>/dev/null | head -1 || true)
+          if [[ -n "$BUNDLE_DIR" ]]; then
+            echo "  from release bundle: $BUNDLE_DIR"
+            du -sh "$BUNDLE_DIR"
+            cp -a "$BUNDLE_DIR"/. tina-sdk/
+          else
+            # MEGA 布局: tina5.0_aiot/<project-name>/aiot-...-large-files.tar.zst
+            LARGE_FILES_DIR=$(find /tmp/large-files /tmp/mega-dl -maxdepth 6 -type d -name 'tina5.0_aiot' 2>/dev/null | head -1 || true)
+            [[ -n "$LARGE_FILES_DIR" ]] || { echo "ERROR: large-files tree not found"; exit 1; }
+            du -sh "$LARGE_FILES_DIR"
+            ./scripts/restore-large-files.sh tina-sdk "$LARGE_FILES_DIR"
+          fi
 
       # ------------------------------------------------------- SDK-derived parts
       - name: Build SCP firmware / DTB / AIC WiFi + ET7304 modules
