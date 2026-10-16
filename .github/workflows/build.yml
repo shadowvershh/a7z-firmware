@@ -27,7 +27,8 @@ env:
   UBUNTU_BASE_SHA256: a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2
   ROOTFS_SIZE: "3946823168"
   MANIFEST_URL: https://gitlab.com/tina5.0_aiot/manifest.git
-  MANIFEST_REV: refs/tags/aiot-linux-v1.5.0
+  MANIFEST_REV: master
+  MANIFEST_FILE: tina5.0_aiot-linux-v1.5.0.xml
   BSP_REPO: https://gitee.com/juping_zheng1/radxa-cubie-a7z-tina-bsp.git
   PACK_UBOOT_REV: 7f776a209b72b92e8c6a06abc83b1e7597eef5af
   MEGA_LARGE_FILES: https://mega.nz/folder/hm5m3DhD#whewc4usSeone8jJLtxxaA

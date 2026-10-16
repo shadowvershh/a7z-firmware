@@ -10,7 +10,8 @@ set -Eeuo pipefail
 
 SDK_DIR=${1:-$PWD/tina-sdk}
 MANIFEST_URL=${MANIFEST_URL:-https://gitlab.com/tina5.0_aiot/manifest.git}
-MANIFEST_REV=${MANIFEST_REV:-refs/tags/aiot-linux-v1.5.0}
+MANIFEST_REV=${MANIFEST_REV:-master}
+MANIFEST_FILE=${MANIFEST_FILE:-tina5.0_aiot-linux-v1.5.0.xml}   # manifest 仓库无 tag/default.xml，需显式指定清单文件
 BSP_REPO=${BSP_REPO:-https://gitee.com/juping_zheng1/radxa-cubie-a7z-tina-bsp.git}
 LARGE_FILES_DIR=${LARGE_FILES_DIR:-}   # e.g. /path/to/large-files/tina5.0_aiot
 
@@ -20,8 +21,8 @@ command -v git  >/dev/null || { echo "ERROR: git not installed"; exit 1; }
 # 1) manifest init -----------------------------------------------------------
 mkdir -p "$SDK_DIR"
 if [[ ! -d "$SDK_DIR/.repo" ]]; then
-    echo "==> repo init $MANIFEST_URL ($MANIFEST_REV)"
-    ( cd "$SDK_DIR" && repo init -u "$MANIFEST_URL" -b "$MANIFEST_REV" --repo-url=https://gerrit.googlesource.com/git-repo --no-clone-bundle )
+    echo "==> repo init $MANIFEST_URL ($MANIFEST_REV, -m $MANIFEST_FILE)"
+    ( cd "$SDK_DIR" && repo init -u "$MANIFEST_URL" -b "$MANIFEST_REV" -m "$MANIFEST_FILE" --repo-url=https://gerrit.googlesource.com/git-repo --no-clone-bundle )
 fi
 
 # 2) optional: restrict to the projects the A7Z firmware build needs ----------
