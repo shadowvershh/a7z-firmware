@@ -4,9 +4,11 @@ name: Build A7Z firmware
 # 取源码：GitLab（Tina SDK，公开 repo 清单）+ Gitee（A7Z 板级补丁）+ GitHub（打包工具/Ubuntu base）。
 # 取大文件：优先用本仓库 Release 里的 tina-a7z-large-files.tar.zst，
 #          没有就自动从 MEGA 下（约 1 GB，仅 3 个项目）。
-# 取基础镜像：本仓库 Release "inputs" 里的 base-sd512-a7z.img.xz（约 104 MB）。
+# 取基础镜像：本仓库 Release "inputs" 里
+#          SD  → base-sd512-a7z.img.xz   （512 B 扇区，SD 卡/eMMC）
+#          UFS → base-ufs4096-v2.img.xz  （4096 B 扇区，UFS；保留基底引导，只换 rootfs）
 #
-# 手动触发：Actions → Build A7Z firmware → Run workflow
+# 手动触发：Actions → Build A7Z firmware → Run workflow（matrix 同时产出 SD + UFS 两个固件）
 
 on:
   workflow_dispatch:
@@ -24,6 +26,7 @@ permissions:
 
 env:
   BASE_SHA256: 977EDDFE9F9895D1DD9FFE991C0A9568BCD3B0FAB69F6B509ADE370DA6995EFF
+  UFS_BASE_SHA256: a553bf3e6bdccdc53e63877044335d5b936b1cb47aa1c5aa139fcdcdb615d396
   UBUNTU_BASE_SHA256: a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2
   ROOTFS_SIZE: "3946823168"
   MANIFEST_URL: https://gitlab.com/tina5.0_aiot/manifest.git
@@ -32,14 +35,30 @@ env:
   BSP_REPO: https://gitee.com/juping_zheng1/radxa-cubie-a7z-tina-bsp.git
   PACK_UBOOT_REV: 7f776a209b72b92e8c6a06abc83b1e7597eef5af
   MEGA_LARGE_FILES: https://mega.nz/folder/hm5m3DhD#whewc4usSeone8jJLtxxaA
-  OUT_NAME: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_uart1_wifi_ntp.img
+  OUT_NAME_SD: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_uart1_wifi_ntp_sd512.img
+  OUT_NAME_UFS: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_uart1_wifi_ntp_ufs4096.img
+  # UFS 基底 v2：10 GiB，4096 B 逻辑扇区，boot blob @ 字节 1056768，板上已验证。
+  # p3 起始字节两种介质相同（332 MiB = 679936 × 512）。
+  UFS_BASE_IMG: cache/base-ufs.img
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [sd, ufs]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set image name
+        run: |
+          if [[ "${{ matrix.target }}" == "sd" ]]; then
+            echo "OUT_NAME=$OUT_NAME_SD" >> "$GITHUB_ENV"
+          else
+            echo "OUT_NAME=$OUT_NAME_UFS" >> "$GITHUB_ENV"
+          fi
 
       - name: Free disk space
         run: |
@@ -73,10 +92,9 @@ jobs:
           mkdir -p /tmp/large-files
           got=0
           if [[ "$MODE" == "auto" || "$MODE" == "release" ]]; then
-            URL="${{ github.server_url }}/${{ github.repository }}/releases/download/inputs/tina-a7z-large-files.tar.zst"
-            if curl -fsIL "$URL" >/dev/null 2>&1; then
+            # 私有仓库的 Release 资产必须带 token 下载：用预装的 gh
+            if gh release download inputs -R "$GITHUB_REPOSITORY" -p 'tina-a7z-large-files.tar.zst' -O /tmp/lf.tar.zst; then
               echo "==> large files from repo Release"
-              curl -fL --retry 3 -o /tmp/lf.tar.zst "$URL"
               tar --zstd -xf /tmp/lf.tar.zst -C /tmp/large-files
               got=1
             elif [[ "$MODE" == "release" ]]; then
@@ -109,21 +127,36 @@ jobs:
         run: sudo ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
       # ------------------------------------------------------------- rootfs
-      - name: Fetch base SD image from Release
+      - name: Fetch base image from Release (SD)
+        if: matrix.target == 'sd'
         run: |
           set -Eeuo pipefail
           mkdir -p cache out work
-          curl -fL --retry 3 -o cache/base.img.xz \
-            "${{ github.server_url }}/${{ github.repository }}/releases/download/inputs/base-sd512-a7z.img.xz"
+          gh release download inputs -R "$GITHUB_REPOSITORY" -p 'base-sd512-a7z.img.xz' -O cache/base.img.xz
           xz -t cache/base.img.xz
           xz -dkf cache/base.img.xz
           echo "$BASE_SHA256  cache/base.img" | sha256sum -c -
+
+      - name: Fetch base image from Release (UFS)
+        if: matrix.target == 'ufs'
+        run: |
+          set -Eeuo pipefail
+          mkdir -p cache out work
+          gh release download inputs -R "$GITHUB_REPOSITORY" -p 'base-ufs4096-v2.img.xz' -O cache/base-ufs.img.xz
+          xz -t cache/base-ufs.img.xz
+          echo "$UFS_BASE_SHA256  cache/base-ufs.img.xz" | sha256sum -c -
+          xz -dkf cache/base-ufs.img.xz && rm -f cache/base-ufs.img.xz
 
       - name: Mount vendor root (base p3, read-only)
         run: |
           set -Eeuo pipefail
           mkdir -p work/vendor
-          LOOP=$(sudo losetup -f --show -o $((679936*512)) cache/base.img)
+          if [[ "${{ matrix.target }}" == "sd" ]]; then
+            BASE_IMG=cache/base.img
+          else
+            BASE_IMG="$UFS_BASE_IMG"
+          fi
+          LOOP=$(sudo losetup -f --show -o $((679936*512)) "$BASE_IMG")
           echo "LOOP=$LOOP" >> "$GITHUB_ENV"
           sudo mount -o ro "$LOOP" work/vendor
 
@@ -159,16 +192,43 @@ jobs:
           sudo losetup -D 2>/dev/null
           true
 
+      # 释放磁盘：SDK 源码在编完模块后不再需要
+      - name: Free disk space (post SDK)
+        run: |
+          rm -rf tina-sdk work/sdk-parts-work /tmp/large-files /tmp/lf.tar.zst
+          df -h /
+
       # ------------------------------------------------------------ assemble
-      - name: Compose 4 GiB image
+      - name: Compose 4 GiB image (SD)
+        if: matrix.target == 'sd'
         run: |
           set -Eeuo pipefail
           python3 rootfs/compose_a7z_ubuntu_image.py \
             --base cache/base.img \
             --rootfs-ext4 out/rootfs.ext4 \
             --out "out/$OUT_NAME"
+          rm -f cache/base.img
 
-      - name: Patch boot package + p2 DTB
+      # UFS：保留基底引导（boot0/U-Boot/p1/p2 均为板上已验证版本），就地替换 p3 rootfs。
+      # 基底 4096 B 逻辑扇区；rootfs.ext4 dd 进 p3 后在线扩到 p3 实际大小。
+      - name: Compose image (UFS)
+        if: matrix.target == 'ufs'
+        run: |
+          set -Eeuo pipefail
+          LOOP=$(sudo losetup -f --show -b 4096 --partscan "$UFS_BASE_IMG")
+          trap 'sudo losetup -d "$LOOP" 2>/dev/null || true' EXIT
+          echo "==> base partitions:"
+          sudo parted -ms "$UFS_BASE_IMG" unit s print || true
+          sudo dd if=out/rootfs.ext4 of="${LOOP}p3" bs=4M conv=fsync status=progress
+          sudo resize2fs "${LOOP}p3"
+          sudo e2fsck -fn "${LOOP}p3" && echo "e2fsck: clean"
+          sudo losetup -d "$LOOP"
+          trap - EXIT
+          mv "$UFS_BASE_IMG" "out/$OUT_NAME"
+          df -h /
+
+      - name: Patch boot package + p2 DTB (SD)
+        if: matrix.target == 'sd'
         run: |
           set -Eeuo pipefail
           python3 scripts/patch_image_boot.py \
@@ -180,10 +240,19 @@ jobs:
       - name: Verify
         run: |
           set -Eeuo pipefail
-          python3 scripts/verify-radxa-img.py "out/$OUT_NAME" 512 | tail -25
-          LOOP=$(sudo losetup -f --show -o $((679936*512)) "out/$OUT_NAME")
-          sudo e2fsck -fn "$LOOP" && echo "e2fsck: clean"
-          sudo losetup -d "$LOOP"
+          if [[ "${{ matrix.target }}" == "sd" ]]; then
+            python3 scripts/verify-radxa-img.py "out/$OUT_NAME" 512 | tail -25
+            LOOP=$(sudo losetup -f --show -o $((679936*512)) "out/$OUT_NAME")
+            sudo e2fsck -fn "$LOOP" && echo "e2fsck: clean"
+            sudo losetup -d "$LOOP"
+          else
+            LOOP=$(sudo losetup -f --show -b 4096 --partscan "out/$OUT_NAME")
+            trap 'sudo losetup -d "$LOOP" 2>/dev/null || true' EXIT
+            sudo e2fsck -fn "${LOOP}p3" && echo "e2fsck: clean"
+            sudo parted -ms "out/$OUT_NAME" unit s print || true
+            sudo losetup -d "$LOOP"
+            trap - EXIT
+          fi
           sha256sum "out/$OUT_NAME" | tee "out/$OUT_NAME.sha256"
 
       - name: Compress
@@ -192,16 +261,26 @@ jobs:
           xz -T0 -6 -c "out/$OUT_NAME" > "out/$OUT_NAME.xz"
           xz -t "out/$OUT_NAME.xz"
           sha256sum "out/$OUT_NAME.xz" | tee "out/$OUT_NAME.xz.sha256"
+          rm -f "out/$OUT_NAME"
           ls -lh out
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: a7z-firmware-${{ github.run_number }}
+          name: a7z-firmware-${{ matrix.target }}-${{ github.run_number }}
           path: |
             out/*.img.xz
             out/*.sha256
-            out/boot-patch.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload boot patch report (SD)
+        if: matrix.target == 'sd'
+        uses: actions/upload-artifact@v4
+        with:
+          name: a7z-boot-patch-${{ github.run_number }}
+          path: out/boot-patch.json
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
