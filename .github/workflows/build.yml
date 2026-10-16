@@ -45,6 +45,9 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 350
+    env:
+      # gh 2.102+ 不再自动读取 GITHUB_TOKEN，必须显式设置
+      GH_TOKEN: ${{ github.token }}
     strategy:
       fail-fast: false
       matrix:
