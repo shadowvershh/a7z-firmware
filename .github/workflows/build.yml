@@ -176,12 +176,15 @@ jobs:
           mkdir -p work/vendor
           if [[ "${{ matrix.target }}" == "sd" ]]; then
             BASE_IMG=cache/base.img
+            LOOP=$(sudo losetup -f --show -o $((679936*512)) "$BASE_IMG")
+            echo "LOOP=$LOOP" >> "$GITHUB_ENV"
+            sudo mount -o ro "$LOOP" work/vendor
           else
-            BASE_IMG="$UFS_BASE_IMG"
+            # UFS 基底 4096B 逻辑扇区，按分区表挂 p3（交接文档的验证方法）
+            LOOP=$(sudo losetup -f --show -b 4096 --partscan "$UFS_BASE_IMG")
+            echo "LOOP=$LOOP" >> "$GITHUB_ENV"
+            sudo mount -o ro "${LOOP}p3" work/vendor
           fi
-          LOOP=$(sudo losetup -f --show -o $((679936*512)) "$BASE_IMG")
-          echo "LOOP=$LOOP" >> "$GITHUB_ENV"
-          sudo mount -o ro "$LOOP" work/vendor
 
       - name: Fetch Ubuntu Base 24.04.5 arm64
         run: |
@@ -201,7 +204,12 @@ jobs:
             --vendor-root "$PWD/work/vendor" \
             --out-ext4 "$PWD/out/rootfs.ext4" \
             --size-bytes "$ROOTFS_SIZE"
-          sudo ./rootfs/verify_rootfs.sh "$PWD/out/rootfs.ext4" "$PWD/work/vendor"
+          VLOOP=$(sudo losetup -f --show --read-only "$PWD/out/rootfs.ext4")
+          sudo mkdir -p work/rootfs-verify
+          sudo mount -o ro "$VLOOP" work/rootfs-verify
+          sudo ./rootfs/verify_rootfs.sh "$PWD/work/rootfs-verify"
+          sudo umount work/rootfs-verify
+          sudo losetup -d "$VLOOP"
 
       - name: Apply WiFi / NTP / timezone overlay
         run: sudo ./scripts/apply_extra_overlay.sh "$PWD/out/rootfs.ext4" "$PWD/overlay"
