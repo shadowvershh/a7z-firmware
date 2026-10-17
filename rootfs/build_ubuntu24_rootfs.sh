@@ -131,7 +131,9 @@ while IFS=$'\t' read -r digest source_rel dest_rel || [[ -n "${digest:-}${source
     case "$dest_rel" in /*|../*|*/../*|*'/..') fail "unsafe vendor destination path: $dest_rel" ;; esac
     source_file="$VENDOR_ROOT/$source_rel"
     destination="$ROOTFS/$dest_rel"
-    [[ -f "$source_file" && ! -L "$source_file" ]] || fail "vendor manifest source is not a regular file: $source_rel"
+    # 允许指向普通文件的符号链接（UFS 基底 vendor 根里有此类条目，如 libNBGlinker.so）；
+    # 内容仍由下方 SHA-256 校验兜底。
+    [[ -f "$source_file" ]] || fail "vendor manifest source is not a regular file: $source_rel"
     source_sha=$(sha256sum -- "$source_file" | awk '{print $1}')
     [[ "$source_sha" == "$digest" ]] || fail "vendor source SHA-256 mismatch: $source_rel"
     if [[ -e "$destination" && ! -L "$destination" ]]; then
