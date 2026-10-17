@@ -180,10 +180,12 @@ jobs:
             echo "LOOP=$LOOP" >> "$GITHUB_ENV"
             sudo mount -o ro "$LOOP" work/vendor
           else
-            # UFS 基底 4096B 逻辑扇区，按分区表挂 p3（交接文档的验证方法）
-            LOOP=$(sudo losetup -f --show -b 4096 --partscan "$UFS_BASE_IMG")
+            # UFS 基底 4096B 逻辑扇区；runner 的 losetup --partscan 不识别，自行解析 GPT 取 p3 偏移
+            read -r P3_OFF P3_SZ < <(python3 scripts/ufs_rootfs_partition.py "$UFS_BASE_IMG" 4096)
+            echo "UFS p3: offset=$P3_OFF size=$P3_SZ"
+            LOOP=$(sudo losetup -f --show -o "$P3_OFF" --sizelimit "$P3_SZ" "$UFS_BASE_IMG")
             echo "LOOP=$LOOP" >> "$GITHUB_ENV"
-            sudo mount -o ro "${LOOP}p3" work/vendor
+            sudo mount -o ro "$LOOP" work/vendor
           fi
 
       - name: Fetch Ubuntu Base 24.04.5 arm64
@@ -240,13 +242,13 @@ jobs:
         if: matrix.target == 'ufs'
         run: |
           set -Eeuo pipefail
-          LOOP=$(sudo losetup -f --show -b 4096 --partscan "$UFS_BASE_IMG")
+          read -r P3_OFF P3_SZ < <(python3 scripts/ufs_rootfs_partition.py "$UFS_BASE_IMG" 4096)
+          echo "UFS p3: offset=$P3_OFF size=$P3_SZ"
+          LOOP=$(sudo losetup -f --show -o "$P3_OFF" --sizelimit "$P3_SZ" "$UFS_BASE_IMG")
           trap 'sudo losetup -d "$LOOP" 2>/dev/null || true' EXIT
-          echo "==> base partitions:"
-          sudo parted -ms "$UFS_BASE_IMG" unit s print || true
-          sudo dd if=out/rootfs.ext4 of="${LOOP}p3" bs=4M conv=fsync status=progress
-          sudo resize2fs "${LOOP}p3"
-          sudo e2fsck -fn "${LOOP}p3" && echo "e2fsck: clean"
+          sudo dd if=out/rootfs.ext4 of="$LOOP" bs=4M conv=fsync status=progress
+          sudo resize2fs "$LOOP"
+          sudo e2fsck -fn "$LOOP" && echo "e2fsck: clean"
           sudo losetup -d "$LOOP"
           trap - EXIT
           mv "$UFS_BASE_IMG" "out/$OUT_NAME"
