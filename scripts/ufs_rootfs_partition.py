@@ -9,7 +9,8 @@ import struct, sys
 
 img, sector_size = sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 4096
 with open(img, "rb") as f:
-    hdr = f.seek(sector_size) or f.read(512)
+    f.seek(sector_size)
+    hdr = f.read(512)
     if hdr[0:8] != b"EFI PART":
         sys.exit("ERROR: not a GPT image")
     part_lba = struct.unpack("<Q", hdr[72:80])[0]
