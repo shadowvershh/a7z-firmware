@@ -180,6 +180,8 @@ copy_link usr/local/lib/libglapi.so usr/local/lib/libglapi.so libglapi.so.0
 copy_link usr/local/lib/libglapi.so.0 usr/local/lib/libglapi.so.0 libglapi.so.0.0.0
 copy_link usr/local/lib/libwayland-egl.so usr/local/lib/libwayland-egl.so libwayland-egl.so.1
 copy_link usr/local/lib/libwayland-egl.so.1 usr/local/lib/libwayland-egl.so.1 libwayland-egl.so.1.22.0
+# OpenCV（NPU 运行时依赖）在 SD 基底 vendor 根里有；UFS 基底没有 -> 有则配置，无则警告跳过
+if [[ -f "$VENDOR_ROOT/usr/lib/libopencv_core.so.4.7.0" ]]; then
 for stem in libopencv_core libopencv_imgcodecs libopencv_imgproc; do
     real_name="${stem}.so.4.7.0"
     [[ -f "$VENDOR_ROOT/usr/lib/$real_name" ]] || fail "versioned OpenCV library missing: $real_name"
@@ -188,6 +190,9 @@ for stem in libopencv_core libopencv_imgcodecs libopencv_imgproc; do
     ln -s -- "$real_name" "$ROOTFS/opt/a7z-npu/lib/${stem}.so.407"
     ln -s -- "${stem}.so.407" "$ROOTFS/opt/a7z-npu/lib/${stem}.so"
 done
+else
+    echo "WARNING: OpenCV libs absent in this base; skipping NPU OpenCV symlinks (NPU demo needs them)" >&2
+fi
 
 install -d -m 0755 "$ROOTFS/etc/modules-load.d" "$ROOTFS/etc/ld.so.conf.d" "$ROOTFS/etc/profile.d"
 printf 'pvrsrvkm\n' > "$ROOTFS/etc/modules-load.d/a7z-pvr.conf"
