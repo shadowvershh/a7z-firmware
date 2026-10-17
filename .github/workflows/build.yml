@@ -312,3 +312,26 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
+
+  # ------------------------------------------------------------------ release
+  # 把本次构建的固件挂到 GitHub Release，长期保存、网页直接下载（Artifacts 30 天过期）
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: a7z-*
+          merge-multiple: true
+          path: dist
+      - name: Create release and upload firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          TAG="a7z-build-${{ github.run_number }}"
+          ls -lh dist
+          gh release create "$TAG" dist/*             -R "$GITHUB_REPOSITORY"             --title "A7Z firmware $TAG"             --notes "Automated build of ${{ github.sha }} (${{ github.ref_name }}). Contains SD (512B) and UFS (4096B) firmware images with SHA256 checksums."
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY"
