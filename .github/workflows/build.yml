@@ -247,6 +247,7 @@ jobs:
           LOOP=$(sudo losetup -f --show -o "$P3_OFF" --sizelimit "$P3_SZ" "$UFS_BASE_IMG")
           trap 'sudo losetup -d "$LOOP" 2>/dev/null || true' EXIT
           sudo dd if=out/rootfs.ext4 of="$LOOP" bs=4M conv=fsync status=progress
+          sudo e2fsck -fy "$LOOP"   # resize2fs 要求原始覆写后先 fsck
           sudo resize2fs "$LOOP"
           sudo e2fsck -fn "$LOOP" && echo "e2fsck: clean"
           sudo losetup -d "$LOOP"
