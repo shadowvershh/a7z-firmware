@@ -1,0 +1,581 @@
+### FILE /sys/kernel/debug/pinctrl/2000000.pinctrl/pinmux-functions
+function 0: gpio_in, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PB10 PC0 PC1 PC2 PC3 PC4 PC5 PC6 PC7 PC8 PC9 PC10 PC11 PC12 PC13 PC14 PC15 PC16 PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PD22 PD23 PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PE11 PE12 PE13 PE14 PE15 PF0 PF1 PF2 PF3 PF4 PF5 PF6 PG0 PG1 PG2 PG3 PG4 PG5 PG6 PG7 PG8 PG9 PG10 PG11 PG12 PG13 PG14 PH0 PH1 PH2 PH3 PH4 PH5 PH6 PH7 PH8 PH9 PH10 PH11 PH12 PH13 PH14 PH15 PH16 PH17 PH18 PH19 PI0 PI1 PI2 PI3 PI4 PI5 PI6 PI7 PI8 PI9 PI10 PI11 PI12 PI13 PI14 PI15 PI16 PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 PJ20 PJ21 PJ22 PJ23 PJ24 PJ25 PJ26 PJ27 PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 PK20 PK21 PK22 PK23 PK24 PK25 ]
+function 1: gpio_out, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PB10 PC0 PC1 PC2 PC3 PC4 PC5 PC6 PC7 PC8 PC9 PC10 PC11 PC12 PC13 PC14 PC15 PC16 PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PD22 PD23 PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PE11 PE12 PE13 PE14 PE15 PF0 PF1 PF2 PF3 PF4 PF5 PF6 PG0 PG1 PG2 PG3 PG4 PG5 PG6 PG7 PG8 PG9 PG10 PG11 PG12 PG13 PG14 PH0 PH1 PH2 PH3 PH4 PH5 PH6 PH7 PH8 PH9 PH10 PH11 PH12 PH13 PH14 PH15 PH16 PH17 PH18 PH19 PI0 PI1 PI2 PI3 PI4 PI5 PI6 PI7 PI8 PI9 PI10 PI11 PI12 PI13 PI14 PI15 PI16 PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 PJ20 PJ21 PJ22 PJ23 PJ24 PJ25 PJ26 PJ27 PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 PK20 PK21 PK22 PK23 PK24 PK25 ]
+function 2: uart2, groups = [ PB0 PB1 PB2 PB3 PI13 PI14 PJ22 PJ23 PJ26 PJ27 PK6 PK7 PK8 PK9 PK16 PK17 PK18 PK19 ]
+function 3: uart0, groups = [ PB0 PB1 PB9 PB10 PF2 PF4 PI6 PI7 ]
+function 4: spi2, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB6 PH4 PH7 PH8 PH9 PH10 PH11 PH12 PH16 PH17 PH18 PH19 ]
+function 5: dsi, groups = [ PB0 PD20 PH7 PH15 PJ27 ]
+function 6: lcd0, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB9 PB10 PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PG0 PG1 PG2 PG3 PG4 PG5 PJ20 PJ21 PJ22 PJ23 PJ26 PJ27 ]
+function 7: jtag, groups = [ PB0 PB1 PB2 PB3 PF0 PF1 PF3 PF5 PK4 PK5 PK6 PK7 PK8 PK9 ]
+function 8: irq, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PB10 PC0 PC1 PC2 PC3 PC4 PC5 PC6 PC7 PC8 PC9 PC10 PC11 PC12 PC13 PC14 PC15 PC16 PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PD22 PD23 PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PE11 PE12 PE13 PE14 PE15 PF0 PF1 PF2 PF3 PF4 PF5 PF6 PG0 PG1 PG2 PG3 PG4 PG5 PG6 PG7 PG8 PG9 PG10 PG11 PG12 PG13 PG14 PH0 PH1 PH2 PH3 PH4 PH5 PH6 PH7 PH8 PH9 PH10 PH11 PH12 PH13 PH14 PH15 PH16 PH17 PH18 PH19 PI0 PI1 PI2 PI3 PI4 PI5 PI6 PI7 PI8 PI9 PI10 PI11 PI12 PI13 PI14 PI15 PI16 PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 PJ20 PJ21 PJ22 PJ23 PJ24 PJ25 PJ26 PJ27 PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 PK20 PK21 PK22 PK23 PK24 PK25 ]
+function 9: io_disabled, groups = [ PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PB10 PC0 PC1 PC2 PC3 PC4 PC5 PC6 PC7 PC8 PC9 PC10 PC11 PC12 PC13 PC14 PC15 PC16 PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PD22 PD23 PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PE11 PE12 PE13 PE14 PE15 PF0 PF1 PF2 PF3 PF4 PF5 PF6 PG0 PG1 PG2 PG3 PG4 PG5 PG6 PG7 PG8 PG9 PG10 PG11 PG12 PG13 PG14 PH0 PH1 PH2 PH3 PH4 PH5 PH6 PH7 PH8 PH9 PH10 PH11 PH12 PH13 PH14 PH15 PH16 PH17 PH18 PH19 PI0 PI1 PI2 PI3 PI4 PI5 PI6 PI7 PI8 PI9 PI10 PI11 PI12 PI13 PI14 PI15 PI16 PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 PJ20 PJ21 PJ22 PJ23 PJ24 PJ25 PJ26 PJ27 PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 PK20 PK21 PK22 PK23 PK24 PK25 ]
+function 10: hdmi, groups = [ PB2 PB3 PB4 PE6 PE7 PE8 PG11 PG12 PG13 PK0 PK1 PK2 ]
+function 11: twi0, groups = [ PB2 PB3 PB9 PB10 PD20 PD21 PD22 PD23 PG8 PG9 PH0 PH1 ]
+function 12: pwm0_0, groups = [ PB4 PD0 PE3 PJ18 ]
+function 13: i2s0_mclk, groups = [ PB4 ]
+function 14: trace, groups = [ PB4 PB5 PB6 PB7 PB8 PF0 PF1 PF2 PF3 PF5 ]
+function 15: twi1, groups = [ PB4 PB5 PB7 PB8 PH2 PH3 PK0 PK1 ]
+function 16: i2s0_bclk, groups = [ PB5 ]
+function 17: pwm0_1, groups = [ PB5 PD1 PE4 PI0 PK20 ]
+function 18: clk, groups = [ PB6 PB7 PB8 PE6 PE7 PE8 PG10 ]
+function 19: i2s0_lrck, groups = [ PB6 ]
+function 20: pwm0_2, groups = [ PB6 PD2 PD20 PE5 PI1 PK21 ]
+function 21: pwm0_8, groups = [ PB6 PD8 PI7 PK15 ]
+function 22: i2s0_dout0, groups = [ PB7 ]
+function 23: i2s0_din1, groups = [ PB7 ]
+function 24: pwm0_9, groups = [ PB7 PD9 PI8 PK16 ]
+function 25: owa0, groups = [ PB7 PB8 PI10 PI11 ]
+function 26: i2s0_din0, groups = [ PB8 ]
+function 27: i2s0_dout1, groups = [ PB8 ]
+function 28: pwm1_0, groups = [ PB8 PD10 PI9 PK17 ]
+function 29: i2s0_din2, groups = [ PB9 ]
+function 30: i2s0_dout2, groups = [ PB9 ]
+function 31: pwm1_1, groups = [ PB9 PD11 PG0 PI10 PK18 ]
+function 32: watchdog, groups = [ PB9 ]
+function 33: twi8, groups = [ PB9 PB10 PI15 PI16 ]
+function 34: test, groups = [ PB9 PB10 ]
+function 35: i2s0_din3, groups = [ PB10 ]
+function 36: i2s0_dout3, groups = [ PB10 ]
+function 37: pwm1_2, groups = [ PB10 PD12 PG1 PI11 PK19 ]
+function 38: pll, groups = [ PB10 PE5 ]
+function 39: nand, groups = [ PC0 PC1 PC2 PC3 PC4 PC5 PC6 PC7 PC8 PC9 PC10 PC11 PC12 PC13 PC14 PC15 PC16 ]
+function 40: sdc2, groups = [ PC0 PC1 PC5 PC6 PC8 PC9 PC10 PC11 PC13 PC14 PC15 PC16 ]
+function 41: sdc3, groups = [ PC0 PC1 PC5 PC6 PC8 PC9 PC10 PC11 PC13 PC14 PC15 PC16 ]
+function 42: spi0, groups = [ PC2 PC3 PC4 PC7 PC12 PC15 PC16 ]
+function 43: spif0, groups = [ PC2 PC3 PC4 PC7 PC8 PC9 PC10 PC11 PC12 PC15 PC16 ]
+function 44: lvds0, groups = [ PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 ]
+function 45: dsi0, groups = [ PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 ]
+function 46: eink, groups = [ PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD7 PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 PD20 PD21 PD22 ]
+function 47: pwm0_3, groups = [ PD3 PD21 PI2 PK10 ]
+function 48: pwm0_4, groups = [ PD4 PD22 PI3 PK11 ]
+function 49: pwm0_5, groups = [ PD5 PD23 PI4 PK12 ]
+function 50: pwm0_6, groups = [ PD6 PI5 PK13 PK24 ]
+function 51: pwm0_7, groups = [ PD7 PI6 PK14 PK25 ]
+function 52: lvds1, groups = [ PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 ]
+function 53: dsi1, groups = [ PD10 PD11 PD12 PD13 PD14 PD15 PD16 PD17 PD18 PD19 ]
+function 54: spi1, groups = [ PD10 PD11 PD12 PD13 PD14 PD15 PD18 PH0 PH1 PH2 PH3 PH4 PH5 PH6 ]
+function 55: pwm1_3, groups = [ PD13 PG2 PI12 PJ21 ]
+function 56: uart3, groups = [ PD14 PD15 PD16 PD17 PH4 PH5 PH6 PH7 PI11 PI12 PI13 PI14 PI15 PI16 PJ20 PJ21 PJ22 PJ23 PK20 PK21 PK22 PK23 ]
+function 57: twi2, groups = [ PD16 PD17 PD22 PD23 PE1 PE2 PF0 PF3 PI15 PI16 PK6 PK7 PK20 PK21 ]
+function 58: uart4, groups = [ PD18 PD19 PD20 PD21 PG6 PG7 PG8 PG9 PI0 PI1 PJ24 PJ25 PJ26 PJ27 PK6 PK7 PK8 PK9 ]
+function 59: pwm1_5, groups = [ PD19 PD23 PG4 PI14 PJ23 ]
+function 60: pcie, groups = [ PD20 PD21 PD22 PD23 PE11 PE12 PE13 PE14 PI10 PI13 PI14 PK4 PK5 PK14 ]
+function 61: twi3, groups = [ PD20 PD21 PE3 PE4 PH0 PH1 PI0 PI1 PJ22 PJ23 PK16 PK17 PK22 PK23 ]
+function 62: pwm1_4, groups = [ PD22 PG3 PI13 PJ22 ]
+function 63: mcsi0, groups = [ PE0 PK8 PK24 ]
+function 64: csi0, groups = [ PE0 PE2 ]
+function 65: spi3, groups = [ PE0 PE1 PE2 PE3 PE4 PE11 PE12 PE13 PE14 PE15 PJ17 PJ21 PJ24 PJ25 PJ26 PJ27 PK4 PK5 PK6 PK7 PK8 ]
+function 66: lpc, groups = [ PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PG0 PG1 PG2 PG3 PG4 PG5 PG6 PG7 PG8 PG9 PG10 ]
+function 67: ncsi0, groups = [ PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE7 PE8 PE9 PE10 PE11 ]
+function 68: uart6, groups = [ PE0 PE1 PE2 PE3 PE4 PE5 PE6 PE9 PI2 PI3 PI4 PI5 PI6 PI7 PI8 PI9 PK0 PK1 PK2 PK3 PK10 PK11 PK12 PK13 ]
+function 69: csi1, groups = [ PE1 PE3 ]
+function 70: ledc, groups = [ PE4 PH15 ]
+function 71: mcsi1, groups = [ PE5 PK18 PK25 ]
+function 72: i2s3_din0, groups = [ PE6 ]
+function 73: i2s3_dout1, groups = [ PE6 ]
+function 74: i2s3_bclk, groups = [ PE7 ]
+function 75: twi11, groups = [ PE7 PE8 PI4 PI5 PJ22 PJ23 ]
+function 76: i2s3_lrck, groups = [ PE8 ]
+function 77: mcsi2, groups = [ PE9 PK9 PK19 ]
+function 78: tcon, groups = [ PE9 PE10 ]
+function 79: i2s3_mclk, groups = [ PE9 ]
+function 80: twi4, groups = [ PE10 PE11 PI0 PI1 PJ18 PJ19 PJ24 PJ25 ]
+function 81: i2s3_din3, groups = [ PE10 ]
+function 82: i2s3_dout3, groups = [ PE10 ]
+function 83: uart1, groups = [ PE10 PE11 PE12 PE13 PG6 PG7 PG8 PG9 PI15 PI16 PK20 PK21 PK22 PK23 ]
+function 84: i2s3_din2, groups = [ PE11 ]
+function 85: i2s3_dout2, groups = [ PE11 ]
+function 86: i2s3_dout0, groups = [ PE12 ]
+function 87: i2s3_din1, groups = [ PE12 ]
+function 88: pwm1_8, groups = [ PE14 PG7 PH18 PJ26 PK5 ]
+function 89: ir, groups = [ PE14 PE15 PH16 PH17 PI8 PI12 ]
+function 90: twi9, groups = [ PE14 PE15 PG11 PG12 PK18 PK19 ]
+function 91: pwm1_9, groups = [ PE15 PG10 PH19 PJ27 PK5 ]
+function 92: sdc0, groups = [ PF0 PF1 PF2 PF3 PF4 PF5 ]
+function 93: uart5, groups = [ PF0 PF3 PF4 PF5 PG8 PG9 PH13 PH14 PH15 PH16 PI8 PI9 PI11 PI12 PJ16 PJ17 PJ18 PJ19 ]
+function 94: sdc1, groups = [ PG0 PG1 PG2 PG3 PG4 PG5 ]
+function 95: pwm1_6, groups = [ PG5 PI15 PJ24 PK22 ]
+function 96: pwm1_7, groups = [ PG6 PI16 PJ25 PK23 ]
+function 97: i2s1_mclk, groups = [ PG10 ]
+function 98: dmic, groups = [ PG10 PG11 PG12 PG13 PG14 PH8 PH9 PH10 PH11 PH12 ]
+function 99: i2s1_bclk, groups = [ PG11 ]
+function 100: twi12, groups = [ PG11 PG12 PJ20 PJ21 PK24 PK25 ]
+function 101: sgpio, groups = [ PG11 PG12 PG13 PG14 PK0 PK1 PK2 PK3 ]
+function 102: i2s1_lrck, groups = [ PG12 ]
+function 103: i2s1_dout0, groups = [ PG13 ]
+function 104: i2s1_din1, groups = [ PG13 ]
+function 105: twi6, groups = [ PG13 PG14 PH16 PH17 ]
+function 106: i2s1_din0, groups = [ PG14 ]
+function 107: i2s1_dout1, groups = [ PG14 ]
+function 108: i2s2_dout2, groups = [ PH0 ]
+function 109: i2s2_din2, groups = [ PH0 ]
+function 110: rgmii0, groups = [ PH0 PH1 PH2 PH3 PH4 PH5 PH6 PH7 PH8 PH9 PH10 PH11 PH12 PH13 PH14 PH15 ]
+function 111: i2s2_dout3, groups = [ PH1 ]
+function 112: i2s2_din3, groups = [ PH1 ]
+function 113: i2s2_mclk, groups = [ PH2 ]
+function 114: i2s2_bclk, groups = [ PH3 ]
+function 115: i2s2_lrck, groups = [ PH4 ]
+function 116: i2s2_din1, groups = [ PH5 ]
+function 117: i2s2_dout0, groups = [ PH5 ]
+function 118: i2s2_dout1, groups = [ PH6 ]
+function 119: i2s2_din0, groups = [ PH6 ]
+function 120: twi7, groups = [ PH13 PH14 PH18 PH19 PJ16 PJ17 PJ22 PJ23 ]
+function 121: twi5, groups = [ PH16 PH17 PI11 PI12 PJ26 PJ27 PK2 PK3 ]
+function 122: spi4, groups = [ PI2 PI3 PI4 PI5 PI6 PI7 PI9 ]
+function 123: lcd1, groups = [ PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 PJ20 PJ21 PJ22 PJ23 PJ24 PJ25 PJ26 PJ27 ]
+function 124: lvds2, groups = [ PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 ]
+function 125: rgmii1, groups = [ PJ0 PJ1 PJ2 PJ3 PJ4 PJ5 PJ6 PJ7 PJ8 PJ9 PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 ]
+function 126: lvds3, groups = [ PJ10 PJ11 PJ12 PJ13 PJ14 PJ15 PJ16 PJ17 PJ18 PJ19 ]
+function 127: i2s4_bclk, groups = [ PJ16 PK0 ]
+function 128: i2s4_mclk, groups = [ PJ17 PK1 ]
+function 129: i2s4_lrck, groups = [ PJ18 PK2 ]
+function 130: i2s4_din0, groups = [ PJ19 PK3 ]
+function 131: i2s4_dout1, groups = [ PJ19 PK3 ]
+function 132: i2s4_dout0, groups = [ PJ20 PK4 ]
+function 133: i2s4_din1, groups = [ PJ20 PK4 ]
+function 134: twi10, groups = [ PJ20 PJ21 PK24 PK25 ]
+function 135: mcsia, groups = [ PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 ]
+function 136: ncsi1, groups = [ PK0 PK1 PK2 PK3 PK4 PK5 PK6 PK7 PK8 PK9 PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 PK20 PK21 PK22 PK23 ]
+function 137: mcsib, groups = [ PK10 PK11 PK12 PK13 PK14 PK15 PK16 PK17 PK18 PK19 ]
+function 138: mcsic, groups = [ PK20 PK21 PK22 PK23 PK24 PK25 ]
+### FILE /sys/kernel/debug/pinctrl/7025000.pinctrl/pinmux-functions
+function 0: gpio_in, groups = [ PL0 PL1 PL2 PL3 PL4 PL5 PL6 PL7 PL8 PL9 PL10 PL11 PL12 PL13 PM0 PM1 PM2 PM3 PM4 PM5 ]
+function 1: gpio_out, groups = [ PL0 PL1 PL2 PL3 PL4 PL5 PL6 PL7 PL8 PL9 PL10 PL11 PL12 PL13 PM0 PM1 PM2 PM3 PM4 PM5 ]
+function 2: s_twi0, groups = [ PL0 PL1 PL8 PL9 ]
+function 3: s_twi1, groups = [ PL0 PL1 PL2 PL3 PL8 PL9 PL12 PL13 PM0 PM1 PM4 PM5 ]
+function 4: s_twi2, groups = [ PL0 PL1 PL4 PL5 PL8 PL9 PL10 PL11 PL12 PL13 PM4 PM5 ]
+function 5: irq, groups = [ PL0 PL1 PL2 PL3 PL4 PL5 PL6 PL7 PL8 PL9 PL10 PL11 PL12 PL13 PM0 PM1 PM2 PM3 PM4 PM5 ]
+function 6: io_disabled, groups = [ PL0 PL1 PL2 PL3 PL4 PL5 PL6 PL7 PL8 PL9 PL10 PL11 PL12 PL13 PM0 PM1 PM2 PM3 PM4 PM5 ]
+function 7: s_ir_rx, groups = [ PL1 PL3 PL4 PL6 PL11 PL12 PM0 PM4 PM5 ]
+function 8: s_uart1, groups = [ PL2 PL3 PL8 PL9 PL10 PL11 PL12 PL13 PM2 PM3 PM4 PM5 ]
+function 9: s_uart0, groups = [ PL2 PL3 PL6 PL7 PL10 PL11 PM2 PM3 PM4 PM5 ]
+function 10: s_pwm0_0, groups = [ PL2 PM4 ]
+function 11: s_pwm0_1, groups = [ PL3 PM5 ]
+function 12: s_jtag_ms, groups = [ PL4 PM0 ]
+function 13: s_spi0, groups = [ PL4 PL5 PL6 PL7 PM0 PM1 PM2 PM3 ]
+function 14: s_pwm0_2, groups = [ PL4 PM0 ]
+function 15: s_jtag_ck, groups = [ PL5 PM1 ]
+function 16: s_pwm0_3, groups = [ PL5 PM1 ]
+function 17: s_jtag_do, groups = [ PL6 PM2 ]
+function 18: s_pwm0_4, groups = [ PL6 PM2 ]
+function 19: s_jtag_di, groups = [ PL7 PM3 ]
+function 20: s_pwm0_5, groups = [ PL7 PM3 ]
+function 21: s_pwm0_6, groups = [ PL8 ]
+function 22: s_pwm0_7, groups = [ PL9 ]
+function 23: s_pwm0_8, groups = [ PL10 ]
+function 24: s_pwm0_9, groups = [ PL11 ]
+function 25: s_rjtag_ms, groups = [ PM0 ]
+function 26: s_rjtag_ck, groups = [ PM1 ]
+### FILE /sys/kernel/debug/pinctrl/2000000.pinctrl/pinmux-pins
+Pinmux settings per pin
+Format: pin (name): mux_owner|gpio_owner (strict) hog?
+pin 32 (PB0): UNCLAIMED
+pin 33 (PB1): UNCLAIMED
+pin 34 (PB2): UNCLAIMED
+pin 35 (PB3): UNCLAIMED
+pin 36 (PB4): UNCLAIMED
+pin 37 (PB5): UNCLAIMED
+pin 38 (PB6): UNCLAIMED
+pin 39 (PB7): UNCLAIMED
+pin 40 (PB8): UNCLAIMED
+pin 41 (PB9): UNCLAIMED
+pin 42 (PB10): UNCLAIMED
+pin 64 (PC0): device 4022000.sdmmc function gpio_in group PC0
+pin 65 (PC1): device 4022000.sdmmc function gpio_in group PC1
+pin 66 (PC2): UNCLAIMED
+pin 67 (PC3): UNCLAIMED
+pin 68 (PC4): UNCLAIMED
+pin 69 (PC5): device 4022000.sdmmc function gpio_in group PC5
+pin 70 (PC6): device 4022000.sdmmc function gpio_in group PC6
+pin 71 (PC7): UNCLAIMED
+pin 72 (PC8): device 4022000.sdmmc function gpio_in group PC8
+pin 73 (PC9): device 4022000.sdmmc function gpio_in group PC9
+pin 74 (PC10): device 4022000.sdmmc function gpio_in group PC10
+pin 75 (PC11): device 4022000.sdmmc function gpio_in group PC11
+pin 76 (PC12): UNCLAIMED
+pin 77 (PC13): device 4022000.sdmmc function gpio_in group PC13
+pin 78 (PC14): device 4022000.sdmmc function gpio_in group PC14
+pin 79 (PC15): device 4022000.sdmmc function gpio_in group PC15
+pin 80 (PC16): device 4022000.sdmmc function gpio_in group PC16
+pin 96 (PD0): UNCLAIMED
+pin 97 (PD1): UNCLAIMED
+pin 98 (PD2): UNCLAIMED
+pin 99 (PD3): UNCLAIMED
+pin 100 (PD4): UNCLAIMED
+pin 101 (PD5): UNCLAIMED
+pin 102 (PD6): UNCLAIMED
+pin 103 (PD7): UNCLAIMED
+pin 104 (PD8): UNCLAIMED
+pin 105 (PD9): UNCLAIMED
+pin 106 (PD10): UNCLAIMED
+pin 107 (PD11): UNCLAIMED
+pin 108 (PD12): UNCLAIMED
+pin 109 (PD13): UNCLAIMED
+pin 110 (PD14): UNCLAIMED
+pin 111 (PD15): UNCLAIMED
+pin 112 (PD16): UNCLAIMED
+pin 113 (PD17): UNCLAIMED
+pin 114 (PD18): UNCLAIMED
+pin 115 (PD19): UNCLAIMED
+pin 116 (PD20): UNCLAIMED
+pin 117 (PD21): UNCLAIMED
+pin 118 (PD22): UNCLAIMED
+pin 119 (PD23): UNCLAIMED
+pin 128 (PE0): UNCLAIMED
+pin 129 (PE1): UNCLAIMED
+pin 130 (PE2): UNCLAIMED
+pin 131 (PE3): UNCLAIMED
+pin 132 (PE4): UNCLAIMED
+pin 133 (PE5): UNCLAIMED
+pin 134 (PE6): UNCLAIMED
+pin 135 (PE7): UNCLAIMED
+pin 136 (PE8): UNCLAIMED
+pin 137 (PE9): UNCLAIMED
+pin 138 (PE10): UNCLAIMED
+pin 139 (PE11): UNCLAIMED
+pin 140 (PE12): UNCLAIMED
+pin 141 (PE13): UNCLAIMED
+pin 142 (PE14): UNCLAIMED
+pin 143 (PE15): UNCLAIMED
+pin 160 (PF0): device 4020000.sdmmc function sdc0 group PF0
+pin 161 (PF1): device 4020000.sdmmc function sdc0 group PF1
+pin 162 (PF2): device 4020000.sdmmc function sdc0 group PF2
+pin 163 (PF3): device 4020000.sdmmc function sdc0 group PF3
+pin 164 (PF4): device 4020000.sdmmc function sdc0 group PF4
+pin 165 (PF5): device 4020000.sdmmc function sdc0 group PF5
+pin 166 (PF6): GPIO 2000000.pinctrl:166
+pin 192 (PG0): device 4021000.sdmmc function gpio_in group PG0
+pin 193 (PG1): device 4021000.sdmmc function gpio_in group PG1
+pin 194 (PG2): device 4021000.sdmmc function gpio_in group PG2
+pin 195 (PG3): device 4021000.sdmmc function gpio_in group PG3
+pin 196 (PG4): device 4021000.sdmmc function gpio_in group PG4
+pin 197 (PG5): device 4021000.sdmmc function gpio_in group PG5
+pin 198 (PG6): device 2501000.uart function uart1 group PG6
+pin 199 (PG7): device 2501000.uart function uart1 group PG7
+pin 200 (PG8): device 2501000.uart function uart1 group PG8
+pin 201 (PG9): device 2501000.uart function uart1 group PG9
+pin 202 (PG10): UNCLAIMED
+pin 203 (PG11): UNCLAIMED
+pin 204 (PG12): UNCLAIMED
+pin 205 (PG13): UNCLAIMED
+pin 206 (PG14): UNCLAIMED
+pin 224 (PH0): UNCLAIMED
+pin 225 (PH1): UNCLAIMED
+pin 226 (PH2): UNCLAIMED
+pin 227 (PH3): UNCLAIMED
+pin 228 (PH4): UNCLAIMED
+pin 229 (PH5): UNCLAIMED
+pin 230 (PH6): UNCLAIMED
+pin 231 (PH7): UNCLAIMED
+pin 232 (PH8): UNCLAIMED
+pin 233 (PH9): UNCLAIMED
+pin 234 (PH10): UNCLAIMED
+pin 235 (PH11): UNCLAIMED
+pin 236 (PH12): UNCLAIMED
+pin 237 (PH13): UNCLAIMED
+pin 238 (PH14): UNCLAIMED
+pin 239 (PH15): UNCLAIMED
+pin 240 (PH16): UNCLAIMED
+pin 241 (PH17): UNCLAIMED
+pin 242 (PH18): UNCLAIMED
+pin 243 (PH19): UNCLAIMED
+pin 256 (PI0): UNCLAIMED
+pin 257 (PI1): UNCLAIMED
+pin 258 (PI2): UNCLAIMED
+pin 259 (PI3): UNCLAIMED
+pin 260 (PI4): UNCLAIMED
+pin 261 (PI5): UNCLAIMED
+pin 262 (PI6): UNCLAIMED
+pin 263 (PI7): UNCLAIMED
+pin 264 (PI8): UNCLAIMED
+pin 265 (PI9): UNCLAIMED
+pin 266 (PI10): UNCLAIMED
+pin 267 (PI11): UNCLAIMED
+pin 268 (PI12): UNCLAIMED
+pin 269 (PI13): UNCLAIMED
+pin 270 (PI14): UNCLAIMED
+pin 271 (PI15): UNCLAIMED
+pin 272 (PI16): UNCLAIMED
+pin 288 (PJ0): UNCLAIMED
+pin 289 (PJ1): UNCLAIMED
+pin 290 (PJ2): UNCLAIMED
+pin 291 (PJ3): UNCLAIMED
+pin 292 (PJ4): UNCLAIMED
+pin 293 (PJ5): UNCLAIMED
+pin 294 (PJ6): UNCLAIMED
+pin 295 (PJ7): UNCLAIMED
+pin 296 (PJ8): UNCLAIMED
+pin 297 (PJ9): UNCLAIMED
+pin 298 (PJ10): UNCLAIMED
+pin 299 (PJ11): UNCLAIMED
+pin 300 (PJ12): UNCLAIMED
+pin 301 (PJ13): UNCLAIMED
+pin 302 (PJ14): UNCLAIMED
+pin 303 (PJ15): UNCLAIMED
+pin 304 (PJ16): UNCLAIMED
+pin 305 (PJ17): UNCLAIMED
+pin 306 (PJ18): UNCLAIMED
+pin 307 (PJ19): UNCLAIMED
+pin 308 (PJ20): UNCLAIMED
+pin 309 (PJ21): UNCLAIMED
+pin 310 (PJ22): UNCLAIMED
+pin 311 (PJ23): UNCLAIMED
+pin 312 (PJ24): UNCLAIMED
+pin 313 (PJ25): UNCLAIMED
+pin 314 (PJ26): UNCLAIMED
+pin 315 (PJ27): UNCLAIMED
+pin 320 (PK0): UNCLAIMED
+pin 321 (PK1): UNCLAIMED
+pin 322 (PK2): UNCLAIMED
+pin 323 (PK3): UNCLAIMED
+pin 324 (PK4): UNCLAIMED
+pin 325 (PK5): UNCLAIMED
+pin 326 (PK6): UNCLAIMED
+pin 327 (PK7): UNCLAIMED
+pin 328 (PK8): UNCLAIMED
+pin 329 (PK9): UNCLAIMED
+pin 330 (PK10): UNCLAIMED
+pin 331 (PK11): UNCLAIMED
+pin 332 (PK12): UNCLAIMED
+pin 333 (PK13): UNCLAIMED
+pin 334 (PK14): UNCLAIMED
+pin 335 (PK15): UNCLAIMED
+pin 336 (PK16): UNCLAIMED
+pin 337 (PK17): UNCLAIMED
+pin 338 (PK18): UNCLAIMED
+pin 339 (PK19): UNCLAIMED
+pin 340 (PK20): UNCLAIMED
+pin 341 (PK21): UNCLAIMED
+pin 342 (PK22): UNCLAIMED
+pin 343 (PK23): UNCLAIMED
+pin 344 (PK24): UNCLAIMED
+pin 345 (PK25): UNCLAIMED
+### FILE /sys/kernel/debug/pinctrl/7025000.pinctrl/pinmux-pins
+Pinmux settings per pin
+Format: pin (name): mux_owner|gpio_owner (strict) hog?
+pin 352 (PL0): device 7083000.twi function s_twi0 group PL0
+pin 353 (PL1): device 7083000.twi function s_twi0 group PL1
+pin 354 (PL2): GPIO 7025000.pinctrl:354
+pin 355 (PL3): GPIO 7025000.pinctrl:355
+pin 356 (PL4): UNCLAIMED
+pin 357 (PL5): UNCLAIMED
+pin 358 (PL6): UNCLAIMED
+pin 359 (PL7): UNCLAIMED
+pin 360 (PL8): UNCLAIMED
+pin 361 (PL9): UNCLAIMED
+pin 362 (PL10): UNCLAIMED
+pin 363 (PL11): UNCLAIMED
+pin 364 (PL12): device 7084000.twi function s_twi1 group PL12
+pin 365 (PL13): device 7084000.twi function s_twi1 group PL13
+pin 384 (PM0): GPIO 7025000.pinctrl:384
+pin 385 (PM1): GPIO 7025000.pinctrl:385
+pin 386 (PM2): GPIO 7025000.pinctrl:386
+pin 387 (PM3): UNCLAIMED
+pin 388 (PM4): UNCLAIMED
+pin 389 (PM5): UNCLAIMED
+### FILE gpio
+## /sys/kernel/debug/pinctrl/2000000.pinctrl/gpio-ranges
+GPIO ranges handled:
+32: 2000000.pinctrl GPIOS [32 - 32] PINS [32 - 32]
+33: 2000000.pinctrl GPIOS [33 - 33] PINS [33 - 33]
+34: 2000000.pinctrl GPIOS [34 - 34] PINS [34 - 34]
+35: 2000000.pinctrl GPIOS [35 - 35] PINS [35 - 35]
+36: 2000000.pinctrl GPIOS [36 - 36] PINS [36 - 36]
+37: 2000000.pinctrl GPIOS [37 - 37] PINS [37 - 37]
+38: 2000000.pinctrl GPIOS [38 - 38] PINS [38 - 38]
+39: 2000000.pinctrl GPIOS [39 - 39] PINS [39 - 39]
+40: 2000000.pinctrl GPIOS [40 - 40] PINS [40 - 40]
+41: 2000000.pinctrl GPIOS [41 - 41] PINS [41 - 41]
+42: 2000000.pinctrl GPIOS [42 - 42] PINS [42 - 42]
+64: 2000000.pinctrl GPIOS [64 - 64] PINS [64 - 64]
+65: 2000000.pinctrl GPIOS [65 - 65] PINS [65 - 65]
+66: 2000000.pinctrl GPIOS [66 - 66] PINS [66 - 66]
+67: 2000000.pinctrl GPIOS [67 - 67] PINS [67 - 67]
+68: 2000000.pinctrl GPIOS [68 - 68] PINS [68 - 68]
+69: 2000000.pinctrl GPIOS [69 - 69] PINS [69 - 69]
+70: 2000000.pinctrl GPIOS [70 - 70] PINS [70 - 70]
+71: 2000000.pinctrl GPIOS [71 - 71] PINS [71 - 71]
+72: 2000000.pinctrl GPIOS [72 - 72] PINS [72 - 72]
+73: 2000000.pinctrl GPIOS [73 - 73] PINS [73 - 73]
+74: 2000000.pinctrl GPIOS [74 - 74] PINS [74 - 74]
+75: 2000000.pinctrl GPIOS [75 - 75] PINS [75 - 75]
+76: 2000000.pinctrl GPIOS [76 - 76] PINS [76 - 76]
+77: 2000000.pinctrl GPIOS [77 - 77] PINS [77 - 77]
+78: 2000000.pinctrl GPIOS [78 - 78] PINS [78 - 78]
+79: 2000000.pinctrl GPIOS [79 - 79] PINS [79 - 79]
+80: 2000000.pinctrl GPIOS [80 - 80] PINS [80 - 80]
+96: 2000000.pinctrl GPIOS [96 - 96] PINS [96 - 96]
+97: 2000000.pinctrl GPIOS [97 - 97] PINS [97 - 97]
+98: 2000000.pinctrl GPIOS [98 - 98] PINS [98 - 98]
+99: 2000000.pinctrl GPIOS [99 - 99] PINS [99 - 99]
+100: 2000000.pinctrl GPIOS [100 - 100] PINS [100 - 100]
+101: 2000000.pinctrl GPIOS [101 - 101] PINS [101 - 101]
+102: 2000000.pinctrl GPIOS [102 - 102] PINS [102 - 102]
+103: 2000000.pinctrl GPIOS [103 - 103] PINS [103 - 103]
+104: 2000000.pinctrl GPIOS [104 - 104] PINS [104 - 104]
+105: 2000000.pinctrl GPIOS [105 - 105] PINS [105 - 105]
+106: 2000000.pinctrl GPIOS [106 - 106] PINS [106 - 106]
+107: 2000000.pinctrl GPIOS [107 - 107] PINS [107 - 107]
+108: 2000000.pinctrl GPIOS [108 - 108] PINS [108 - 108]
+109: 2000000.pinctrl GPIOS [109 - 109] PINS [109 - 109]
+110: 2000000.pinctrl GPIOS [110 - 110] PINS [110 - 110]
+111: 2000000.pinctrl GPIOS [111 - 111] PINS [111 - 111]
+112: 2000000.pinctrl GPIOS [112 - 112] PINS [112 - 112]
+113: 2000000.pinctrl GPIOS [113 - 113] PINS [113 - 113]
+114: 2000000.pinctrl GPIOS [114 - 114] PINS [114 - 114]
+115: 2000000.pinctrl GPIOS [115 - 115] PINS [115 - 115]
+116: 2000000.pinctrl GPIOS [116 - 116] PINS [116 - 116]
+117: 2000000.pinctrl GPIOS [117 - 117] PINS [117 - 117]
+118: 2000000.pinctrl GPIOS [118 - 118] PINS [118 - 118]
+119: 2000000.pinctrl GPIOS [119 - 119] PINS [119 - 119]
+128: 2000000.pinctrl GPIOS [128 - 128] PINS [128 - 128]
+129: 2000000.pinctrl GPIOS [129 - 129] PINS [129 - 129]
+130: 2000000.pinctrl GPIOS [130 - 130] PINS [130 - 130]
+131: 2000000.pinctrl GPIOS [131 - 131] PINS [131 - 131]
+132: 2000000.pinctrl GPIOS [132 - 132] PINS [132 - 132]
+133: 2000000.pinctrl GPIOS [133 - 133] PINS [133 - 133]
+134: 2000000.pinctrl GPIOS [134 - 134] PINS [134 - 134]
+135: 2000000.pinctrl GPIOS [135 - 135] PINS [135 - 135]
+136: 2000000.pinctrl GPIOS [136 - 136] PINS [136 - 136]
+137: 2000000.pinctrl GPIOS [137 - 137] PINS [137 - 137]
+138: 2000000.pinctrl GPIOS [138 - 138] PINS [138 - 138]
+139: 2000000.pinctrl GPIOS [139 - 139] PINS [139 - 139]
+140: 2000000.pinctrl GPIOS [140 - 140] PINS [140 - 140]
+141: 2000000.pinctrl GPIOS [141 - 141] PINS [141 - 141]
+142: 2000000.pinctrl GPIOS [142 - 142] PINS [142 - 142]
+143: 2000000.pinctrl GPIOS [143 - 143] PINS [143 - 143]
+160: 2000000.pinctrl GPIOS [160 - 160] PINS [160 - 160]
+161: 2000000.pinctrl GPIOS [161 - 161] PINS [161 - 161]
+162: 2000000.pinctrl GPIOS [162 - 162] PINS [162 - 162]
+163: 2000000.pinctrl GPIOS [163 - 163] PINS [163 - 163]
+164: 2000000.pinctrl GPIOS [164 - 164] PINS [164 - 164]
+165: 2000000.pinctrl GPIOS [165 - 165] PINS [165 - 165]
+166: 2000000.pinctrl GPIOS [166 - 166] PINS [166 - 166]
+192: 2000000.pinctrl GPIOS [192 - 192] PINS [192 - 192]
+193: 2000000.pinctrl GPIOS [193 - 193] PINS [193 - 193]
+194: 2000000.pinctrl GPIOS [194 - 194] PINS [194 - 194]
+195: 2000000.pinctrl GPIOS [195 - 195] PINS [195 - 195]
+196: 2000000.pinctrl GPIOS [196 - 196] PINS [196 - 196]
+197: 2000000.pinctrl GPIOS [197 - 197] PINS [197 - 197]
+198: 2000000.pinctrl GPIOS [198 - 198] PINS [198 - 198]
+199: 2000000.pinctrl GPIOS [199 - 199] PINS [199 - 199]
+200: 2000000.pinctrl GPIOS [200 - 200] PINS [200 - 200]
+201: 2000000.pinctrl GPIOS [201 - 201] PINS [201 - 201]
+202: 2000000.pinctrl GPIOS [202 - 202] PINS [202 - 202]
+203: 2000000.pinctrl GPIOS [203 - 203] PINS [203 - 203]
+204: 2000000.pinctrl GPIOS [204 - 204] PINS [204 - 204]
+205: 2000000.pinctrl GPIOS [205 - 205] PINS [205 - 205]
+206: 2000000.pinctrl GPIOS [206 - 206] PINS [206 - 206]
+224: 2000000.pinctrl GPIOS [224 - 224] PINS [224 - 224]
+225: 2000000.pinctrl GPIOS [225 - 225] PINS [225 - 225]
+226: 2000000.pinctrl GPIOS [226 - 226] PINS [226 - 226]
+227: 2000000.pinctrl GPIOS [227 - 227] PINS [227 - 227]
+228: 2000000.pinctrl GPIOS [228 - 228] PINS [228 - 228]
+229: 2000000.pinctrl GPIOS [229 - 229] PINS [229 - 229]
+230: 2000000.pinctrl GPIOS [230 - 230] PINS [230 - 230]
+231: 2000000.pinctrl GPIOS [231 - 231] PINS [231 - 231]
+232: 2000000.pinctrl GPIOS [232 - 232] PINS [232 - 232]
+233: 2000000.pinctrl GPIOS [233 - 233] PINS [233 - 233]
+234: 2000000.pinctrl GPIOS [234 - 234] PINS [234 - 234]
+235: 2000000.pinctrl GPIOS [235 - 235] PINS [235 - 235]
+236: 2000000.pinctrl GPIOS [236 - 236] PINS [236 - 236]
+237: 2000000.pinctrl GPIOS [237 - 237] PINS [237 - 237]
+238: 2000000.pinctrl GPIOS [238 - 238] PINS [238 - 238]
+239: 2000000.pinctrl GPIOS [239 - 239] PINS [239 - 239]
+240: 2000000.pinctrl GPIOS [240 - 240] PINS [240 - 240]
+241: 2000000.pinctrl GPIOS [241 - 241] PINS [241 - 241]
+242: 2000000.pinctrl GPIOS [242 - 242] PINS [242 - 242]
+243: 2000000.pinctrl GPIOS [243 - 243] PINS [243 - 243]
+256: 2000000.pinctrl GPIOS [256 - 256] PINS [256 - 256]
+257: 2000000.pinctrl GPIOS [257 - 257] PINS [257 - 257]
+258: 2000000.pinctrl GPIOS [258 - 258] PINS [258 - 258]
+259: 2000000.pinctrl GPIOS [259 - 259] PINS [259 - 259]
+260: 2000000.pinctrl GPIOS [260 - 260] PINS [260 - 260]
+261: 2000000.pinctrl GPIOS [261 - 261] PINS [261 - 261]
+262: 2000000.pinctrl GPIOS [262 - 262] PINS [262 - 262]
+263: 2000000.pinctrl GPIOS [263 - 263] PINS [263 - 263]
+264: 2000000.pinctrl GPIOS [264 - 264] PINS [264 - 264]
+265: 2000000.pinctrl GPIOS [265 - 265] PINS [265 - 265]
+266: 2000000.pinctrl GPIOS [266 - 266] PINS [266 - 266]
+267: 2000000.pinctrl GPIOS [267 - 267] PINS [267 - 267]
+268: 2000000.pinctrl GPIOS [268 - 268] PINS [268 - 268]
+269: 2000000.pinctrl GPIOS [269 - 269] PINS [269 - 269]
+270: 2000000.pinctrl GPIOS [270 - 270] PINS [270 - 270]
+271: 2000000.pinctrl GPIOS [271 - 271] PINS [271 - 271]
+272: 2000000.pinctrl GPIOS [272 - 272] PINS [272 - 272]
+288: 2000000.pinctrl GPIOS [288 - 288] PINS [288 - 288]
+289: 2000000.pinctrl GPIOS [289 - 289] PINS [289 - 289]
+290: 2000000.pinctrl GPIOS [290 - 290] PINS [290 - 290]
+291: 2000000.pinctrl GPIOS [291 - 291] PINS [291 - 291]
+292: 2000000.pinctrl GPIOS [292 - 292] PINS [292 - 292]
+293: 2000000.pinctrl GPIOS [293 - 293] PINS [293 - 293]
+294: 2000000.pinctrl GPIOS [294 - 294] PINS [294 - 294]
+295: 2000000.pinctrl GPIOS [295 - 295] PINS [295 - 295]
+296: 2000000.pinctrl GPIOS [296 - 296] PINS [296 - 296]
+297: 2000000.pinctrl GPIOS [297 - 297] PINS [297 - 297]
+298: 2000000.pinctrl GPIOS [298 - 298] PINS [298 - 298]
+299: 2000000.pinctrl GPIOS [299 - 299] PINS [299 - 299]
+300: 2000000.pinctrl GPIOS [300 - 300] PINS [300 - 300]
+301: 2000000.pinctrl GPIOS [301 - 301] PINS [301 - 301]
+302: 2000000.pinctrl GPIOS [302 - 302] PINS [302 - 302]
+303: 2000000.pinctrl GPIOS [303 - 303] PINS [303 - 303]
+304: 2000000.pinctrl GPIOS [304 - 304] PINS [304 - 304]
+305: 2000000.pinctrl GPIOS [305 - 305] PINS [305 - 305]
+306: 2000000.pinctrl GPIOS [306 - 306] PINS [306 - 306]
+307: 2000000.pinctrl GPIOS [307 - 307] PINS [307 - 307]
+308: 2000000.pinctrl GPIOS [308 - 308] PINS [308 - 308]
+309: 2000000.pinctrl GPIOS [309 - 309] PINS [309 - 309]
+310: 2000000.pinctrl GPIOS [310 - 310] PINS [310 - 310]
+311: 2000000.pinctrl GPIOS [311 - 311] PINS [311 - 311]
+312: 2000000.pinctrl GPIOS [312 - 312] PINS [312 - 312]
+313: 2000000.pinctrl GPIOS [313 - 313] PINS [313 - 313]
+314: 2000000.pinctrl GPIOS [314 - 314] PINS [314 - 314]
+315: 2000000.pinctrl GPIOS [315 - 315] PINS [315 - 315]
+320: 2000000.pinctrl GPIOS [320 - 320] PINS [320 - 320]
+321: 2000000.pinctrl GPIOS [321 - 321] PINS [321 - 321]
+322: 2000000.pinctrl GPIOS [322 - 322] PINS [322 - 322]
+323: 2000000.pinctrl GPIOS [323 - 323] PINS [323 - 323]
+324: 2000000.pinctrl GPIOS [324 - 324] PINS [324 - 324]
+325: 2000000.pinctrl GPIOS [325 - 325] PINS [325 - 325]
+326: 2000000.pinctrl GPIOS [326 - 326] PINS [326 - 326]
+327: 2000000.pinctrl GPIOS [327 - 327] PINS [327 - 327]
+328: 2000000.pinctrl GPIOS [328 - 328] PINS [328 - 328]
+329: 2000000.pinctrl GPIOS [329 - 329] PINS [329 - 329]
+330: 2000000.pinctrl GPIOS [330 - 330] PINS [330 - 330]
+331: 2000000.pinctrl GPIOS [331 - 331] PINS [331 - 331]
+332: 2000000.pinctrl GPIOS [332 - 332] PINS [332 - 332]
+333: 2000000.pinctrl GPIOS [333 - 333] PINS [333 - 333]
+334: 2000000.pinctrl GPIOS [334 - 334] PINS [334 - 334]
+335: 2000000.pinctrl GPIOS [335 - 335] PINS [335 - 335]
+336: 2000000.pinctrl GPIOS [336 - 336] PINS [336 - 336]
+337: 2000000.pinctrl GPIOS [337 - 337] PINS [337 - 337]
+338: 2000000.pinctrl GPIOS [338 - 338] PINS [338 - 338]
+339: 2000000.pinctrl GPIOS [339 - 339] PINS [339 - 339]
+340: 2000000.pinctrl GPIOS [340 - 340] PINS [340 - 340]
+341: 2000000.pinctrl GPIOS [341 - 341] PINS [341 - 341]
+342: 2000000.pinctrl GPIOS [342 - 342] PINS [342 - 342]
+343: 2000000.pinctrl GPIOS [343 - 343] PINS [343 - 343]
+344: 2000000.pinctrl GPIOS [344 - 344] PINS [344 - 344]
+345: 2000000.pinctrl GPIOS [345 - 345] PINS [345 - 345]
+## /sys/kernel/debug/pinctrl/7025000.pinctrl/gpio-ranges
+GPIO ranges handled:
+0: 7025000.pinctrl GPIOS [352 - 352] PINS [352 - 352]
+1: 7025000.pinctrl GPIOS [353 - 353] PINS [353 - 353]
+2: 7025000.pinctrl GPIOS [354 - 354] PINS [354 - 354]
+3: 7025000.pinctrl GPIOS [355 - 355] PINS [355 - 355]
+4: 7025000.pinctrl GPIOS [356 - 356] PINS [356 - 356]
+5: 7025000.pinctrl GPIOS [357 - 357] PINS [357 - 357]
+6: 7025000.pinctrl GPIOS [358 - 358] PINS [358 - 358]
+7: 7025000.pinctrl GPIOS [359 - 359] PINS [359 - 359]
+8: 7025000.pinctrl GPIOS [360 - 360] PINS [360 - 360]
+9: 7025000.pinctrl GPIOS [361 - 361] PINS [361 - 361]
+10: 7025000.pinctrl GPIOS [362 - 362] PINS [362 - 362]
+11: 7025000.pinctrl GPIOS [363 - 363] PINS [363 - 363]
+12: 7025000.pinctrl GPIOS [364 - 364] PINS [364 - 364]
+13: 7025000.pinctrl GPIOS [365 - 365] PINS [365 - 365]
+32: 7025000.pinctrl GPIOS [384 - 384] PINS [384 - 384]
+33: 7025000.pinctrl GPIOS [385 - 385] PINS [385 - 385]
+34: 7025000.pinctrl GPIOS [386 - 386] PINS [386 - 386]
+35: 7025000.pinctrl GPIOS [387 - 387] PINS [387 - 387]
+36: 7025000.pinctrl GPIOS [388 - 388] PINS [388 - 388]
+37: 7025000.pinctrl GPIOS [389 - 389] PINS [389 - 389]

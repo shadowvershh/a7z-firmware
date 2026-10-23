@@ -103,8 +103,10 @@ scripts/
   roundtrip_a7z_boot_package.py     启动包往返自检
   patch_image_boot.py               写启动包槽 + 替换 p2 DTB
   apply_extra_overlay.sh            往 rootfs 灌 WiFi/NTP/时区（ntpsec 优先，timesyncd 兜底）
+  gen_40pin_doc.py                  由实机 pinctrl dump 生成 40pin 复用表
   verify-radxa-img.py               Radxa GPT 校验
 drivers/         tcpci_et7304.c（ET7304 USB-C TCPC 驱动源码）
+docs/            40pin-mux.md（排针功能复用表）+ pinctrl-dump-a7z.txt（生成用原始 dump）
 rootfs/          Ubuntu 24.04 rootfs 构建器 + overlay + 清单 + 单测
 overlay/         AIC WiFi/ET7304 模块 + USB 固件 + systemd-timesyncd + NTP
 overlay/boot/    sunxi.dtb（rootfs /boot 同步用；真正启动的是 p2 那份）
