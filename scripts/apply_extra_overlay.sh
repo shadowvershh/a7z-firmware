@@ -25,12 +25,41 @@ mount "$LOOP" "$MNT"
 # 1) copy overlay payload onto the target rootfs (following /lib -> usr/lib)
 rsync -a --chown=0:0 "$OVERLAY_DIR"/ "$MNT"/
 
-# 2) enable systemd-timesyncd (offline enable: plain symlinks)
-install -d -m 0755 "$MNT/etc/systemd/system/sysinit.target.wants"
-ln -sfn /usr/lib/systemd/system/systemd-timesyncd.service \
-        "$MNT/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service"
-ln -sfn /usr/lib/systemd/system/systemd-timesyncd.service \
-        "$MNT/etc/systemd/system/dbus-org.freedesktop.timesync1.service"
+# 2) time daemon: ntpsec (real ntpd/ntpq, ships as the Ubuntu 24.04 "ntp")
+#    when present, otherwise fall back to systemd-timesyncd.
+#    Both may exist on disk, but only one is enabled: ntpsec wins.
+if [[ -f "$MNT/usr/lib/systemd/system/ntpsec.service" ]]; then
+    install -d -m 0755 "$MNT/etc/systemd/system/multi-user.target.wants"
+    ln -sfn /usr/lib/systemd/system/ntpsec.service \
+            "$MNT/etc/systemd/system/multi-user.target.wants/ntpsec.service"
+    # timesyncd stays installed from the overlay but is never enabled; it would
+    # also refuse to start on its own once another NTP unit is enabled.
+    rm -f "$MNT/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service" \
+          "$MNT/etc/systemd/system/dbus-org.freedesktop.timesync1.service"
+    install -d -m 0755 "$MNT/etc/ntpsec"
+    cat > "$MNT/etc/ntpsec/ntp.conf" <<'NTPCONF'
+# A7Z: 中国 NTP 源（无 RTC，开机由 ntpd 校时；时区 Asia/Shanghai）
+driftfile /var/lib/ntpsec/ntp.drift
+leapfile /usr/share/zoneinfo/leap-seconds.list
+statsdir /var/log/ntpsec/
+pool cn.pool.ntp.org iburst
+server ntp.ustc.edu.cn iburst
+server ntp.aliyun.com iburst
+server time1.cloud.tencent.com iburst
+restrict default kod nomodify nopeer noquery limited
+restrict -6 default kod nomodify nopeer noquery limited
+restrict 127.0.0.1
+restrict -6 ::1
+NTPCONF
+    echo "  time daemon: ntpsec enabled (systemd-timesyncd not enabled)"
+else
+    install -d -m 0755 "$MNT/etc/systemd/system/sysinit.target.wants"
+    ln -sfn /usr/lib/systemd/system/systemd-timesyncd.service \
+            "$MNT/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service"
+    ln -sfn /usr/lib/systemd/system/systemd-timesyncd.service \
+            "$MNT/etc/systemd/system/dbus-org.freedesktop.timesync1.service"
+    echo "  time daemon: systemd-timesyncd enabled"
+fi
 
 # 3) timezone = Asia/Shanghai (no RTC on A7Z; NTP corrects the clock at boot)
 ln -sfn /usr/share/zoneinfo/Asia/Shanghai "$MNT/etc/localtime"

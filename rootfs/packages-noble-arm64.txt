@@ -22,7 +22,9 @@ libwayland-client0
 libwayland-cursor0
 libwayland-egl1
 libwayland-server0
+net-tools
 network-manager
+ntpsec
 openssh-server
 passwd
 sudo

@@ -27,9 +27,14 @@ is_installed() {
         }
         END { exit !found }' "$root/var/lib/dpkg/status"
 }
-for package in systemd systemd-sysv systemd-resolved udev adduser passwd sudo openssh-server kmod iproute2 network-manager wpasupplicant glmark2-es2-wayland weston; do
+for package in systemd systemd-sysv systemd-resolved udev adduser passwd sudo openssh-server kmod iproute2 network-manager wpasupplicant glmark2-es2-wayland weston net-tools ntpsec; do
     is_installed "$package" || fail "required package missing/not installed for arm64: $package"
 done
+
+# net-tools (ifconfig/route/netstat) and ntpsec (ntpd/ntpq) must be usable.
+[[ -x "$root/sbin/ifconfig" || -x "$root/usr/sbin/ifconfig" ]] || fail "ifconfig (net-tools) is missing"
+[[ -x "$root/usr/bin/ntpq" ]] || fail "ntpq (ntpsec) is missing"
+[[ -x "$root/usr/sbin/ntpd" ]] || fail "ntpd (ntpsec) is missing"
 
 need_file etc/apt/sources.list.d/ubuntu.sources
 apt_sources="$root/etc/apt/sources.list.d/ubuntu.sources"

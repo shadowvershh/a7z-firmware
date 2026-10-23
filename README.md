@@ -8,7 +8,8 @@
 - **AIC8800D80 USB WiFi** 驱动 + USB 专用固件
 - **VE 硬件视频引擎 + PowerVR OpenCL/Vulkan**（`libvdecoder`/`libVE`/`libPVROCL`/`libVK_IMG`）
 - **USB-C 口完整可用**：ET7304 TCPC 驱动 + `try-power-role=source`（USB hub / UVC 摄像头 / HDMI 转接器）
-- **systemd-timesyncd** + 中国 NTP + `Asia/Shanghai` 时区
+- **NTP 服务端 ntpd（ntpsec）+ `ntpq`/`ntpdate`**，中国 NTP 源，`Asia/Shanghai` 时区（`systemd-timesyncd` 保留为兜底，仅 ntpsec 缺失时启用）
+- **`net-tools`**：`ifconfig` / `route` / `netstat`（与 `iproute2` 并存）
 - PowerVR GPU / NPU 运行时、`nmtui`、USTC APT 源、串口免密登录（`radxa/radxa`）
 
 ---
@@ -101,7 +102,7 @@ scripts/
   build_a7z_uart1_boot_package.py   重打启动包
   roundtrip_a7z_boot_package.py     启动包往返自检
   patch_image_boot.py               写启动包槽 + 替换 p2 DTB
-  apply_extra_overlay.sh            往 rootfs 灌 WiFi/NTP/时区
+  apply_extra_overlay.sh            往 rootfs 灌 WiFi/NTP/时区（ntpsec 优先，timesyncd 兜底）
   verify-radxa-img.py               Radxa GPT 校验
 drivers/         tcpci_et7304.c（ET7304 USB-C TCPC 驱动源码）
 rootfs/          Ubuntu 24.04 rootfs 构建器 + overlay + 清单 + 单测
