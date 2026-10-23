@@ -23,6 +23,11 @@ on:
         type: choice
         options: ['0', '1']
         default: '0'
+      scp_mode:
+        description: 'Firmware variant: auto = follow the branch name (main=uart1, no-riscv-core=off)'
+        type: choice
+        options: [auto, uart1, off]
+        default: auto
   push:
     tags: ['v*']
 
@@ -40,12 +45,10 @@ env:
   BSP_REPO: https://gitee.com/juping_zheng1/radxa-cubie-a7z-tina-bsp.git
   PACK_UBOOT_REV: 7f776a209b72b92e8c6a06abc83b1e7597eef5af
   MEGA_LARGE_FILES: https://mega.nz/folder/hm5m3DhD#whewc4usSeone8jJLtxxaA
-  OUT_NAME_SD: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_noscp_wifi_ntp_sd512.img
-  OUT_NAME_UFS: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_noscp_wifi_ntp_ufs4096.img
-  # 本分支：不编译 SCP、启动包不带 scp item -> boot0 不放开 RISC-V(E902) 核
-  SCP_MODE: off
-  # 把排针上真正有的 UART 全部引出来（uart2/3/4 + 尽力启用 s_uart0/s_uart1）
-  A7Z_40PIN_UARTS: "1"
+  OUT_NAME_SD: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_VARIANT_wifi_ntp_sd512.img
+  OUT_NAME_UFS: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_VARIANT_wifi_ntp_ufs4096.img
+  # 变体（SCP_MODE / 启动包 / 产物名 / 排针 UART）不写死在这里，
+  # 由 "Select firmware variant" 步骤按分支名自动决定（见该步骤注释）。
   # UFS 基底 v2：10 GiB，4096 B 逻辑扇区，boot blob @ 字节 1056768，板上已验证。
   # p3 起始字节两种介质相同（332 MiB = 679936 × 512）。
   UFS_BASE_IMG: cache/base-ufs.img
@@ -66,13 +69,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set image name
+      - name: Select firmware variant
+        # 变体由分支名决定，workflow_dispatch 的 scp_mode 可覆盖：
+        #   main（或其它分支）  -> uart1：编译 SCP，启动包带 scp，排针保持 vendor pinmux
+        #   no-riscv-core*      -> off  ：不编译 SCP，启动包无 scp item（R 核留复位），
+        #                                 并把排针上真正有的 UART 全引出来
+        # 两个分支共用这一份 workflow 与脚本，只靠这里的判定分叉。
         run: |
-          if [[ "${{ matrix.target }}" == "sd" ]]; then
-            echo "OUT_NAME=$OUT_NAME_SD" >> "$GITHUB_ENV"
-          else
-            echo "OUT_NAME=$OUT_NAME_UFS" >> "$GITHUB_ENV"
+          set -Eeuo pipefail
+          VARIANT="${{ inputs.scp_mode }}"
+          if [[ -z "$VARIANT" || "$VARIANT" == "auto" ]]; then
+            case "${{ github.ref_name }}" in
+              no-riscv-core*) VARIANT=off ;;
+              *)              VARIANT=uart1 ;;
+            esac
           fi
+          if [[ "$VARIANT" == "off" ]]; then
+            PKG=boot/boot_package_noscp.fex
+            SUFFIX=noscp
+            PIN_UARTS=1
+          elif [[ "$VARIANT" == "uart1" ]]; then
+            PKG=boot/boot_package_uart1.fex
+            SUFFIX=uart1
+            PIN_UARTS=0
+          else
+            echo "ERROR: unknown scp_mode '$VARIANT'" >&2
+            exit 1
+          fi
+          if [[ "${{ matrix.target }}" == "sd" ]]; then MEDIA=sd512; else MEDIA=ufs4096; fi
+          echo "A7Z_SCP_MODE=$VARIANT"   >> "$GITHUB_ENV"
+          echo "A7Z_BOOT_PKG=$PKG"       >> "$GITHUB_ENV"
+          echo "A7Z_PIN_UARTS=$PIN_UARTS" >> "$GITHUB_ENV"
+          echo "OUT_NAME=routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_${SUFFIX}_wifi_ntp_${MEDIA}.img" >> "$GITHUB_ENV"
+          echo "variant=$VARIANT  suffix=$SUFFIX  target=${{ matrix.target }}  boot_package=$PKG"
 
       - name: Free disk space
         run: |
@@ -150,7 +179,7 @@ jobs:
       # ------------------------------------------------------- SDK-derived parts
       - name: Build SCP firmware / DTB / AIC WiFi + ET7304 modules
         # sudo -E: 保留 BASELINE_BOOT_PACKAGE 等环境变量（sudo 默认会丢弃）
-        run: sudo -E ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
+        run: SCP_MODE="$A7Z_SCP_MODE" A7Z_40PIN_UARTS="$A7Z_PIN_UARTS" sudo -E ./scripts/build-sdk-parts.sh "$PWD/tina-sdk"
 
       # 释放磁盘：SDK 源码在编完模块后不再需要（必须在取 base 镜像之前，否则 rootfs/UFS 阶段磁盘耗尽）
       - name: Free disk space (post SDK)
@@ -270,7 +299,7 @@ jobs:
           set -Eeuo pipefail
           python3 scripts/patch_image_boot.py \
             --image "out/$OUT_NAME" \
-            --boot-package boot/boot_package_noscp.fex \
+            --boot-package "$A7Z_BOOT_PKG" \
             --dtb dtb/sunxi-uart1.dtb \
             --report out/boot-patch.json
 
