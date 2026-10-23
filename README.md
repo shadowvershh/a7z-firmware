@@ -18,7 +18,12 @@
 
 本分支与 `main` 的差别只有一处：**不再编译 SCP 固件、启动包里没有 `scp` item**。
 
-- boot0 找不到 `scp` 就**不会 de-assert RISC-V 核的复位**，核保持复位状态（真·关闭）
+- boot0 找不到 `scp` 时**预期**不再 de-assert RISC-V 核的复位（即核保持复位）。
+  ⚠️ **此行为尚未在硬件上验证**：boot0 缺少 `scp` item 时到底是"跳过加载"、"报错中止启动"
+  还是"仍然 de-assert 但没有有效代码"，目前没有源码依据（boot0 源码在 GitLab 的 Tina SDK，
+  构建环境外无法访问；`dragonsecboot` 是 x86-64 二进制，aarch64 板上无法本地重打包）。
+  首次刷写本分支镜像时请准备好恢复手段：启动包槽在 SD 的 `0xC00000`（4 MiB），起不来时
+  可从备份 `dd` 写回。另注：复位保持 ≠ 断电，R 核仍在 CCU 时钟域内，省电幅度有限。
 - 副作用：**排针 32/37（PM4/PM5）不再被 S-UART1 占用**，变回普通 GPIO；原来的
   "RISC-V E902 UART1 直出日志"特性在此分支**不可用**
 - DTB 里 arisc 的 `s_uart_config` 保持 `disabled`（不再改到 PM4/PM5）
