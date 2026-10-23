@@ -14,6 +14,31 @@
 
 ---
 
+## ⚠️ 分支 `no-riscv-core`：RISC-V(E902/ARISC) 核关闭
+
+本分支与 `main` 的差别只有一处：**不再编译 SCP 固件、启动包里没有 `scp` item**。
+
+- boot0 找不到 `scp` 就**不会 de-assert RISC-V 核的复位**，核保持复位状态（真·关闭）
+- 副作用：**排针 32/37（PM4/PM5）不再被 S-UART1 占用**，变回普通 GPIO；原来的
+  "RISC-V E902 UART1 直出日志"特性在此分支**不可用**
+- DTB 里 arisc 的 `s_uart_config` 保持 `disabled`（不再改到 PM4/PM5）
+- 改名：产物是 `boot/boot_package_noscp.fex`，镜像名带 `_noscp_`
+- CI 用 `SCP_MODE=off` 触发；`main` 上默认仍是 `SCP_MODE=uart1`，两者互不影响
+
+**已知限制**：本分支只改写 SD 镜像的启动包槽（`patch_image_boot.py`）。UFS 镜像的
+boot blob 由基底镜像原样带入，其中的 scp 未被移除，因此 **UFS 产物里 RISC-V 核仍是开着的**，
+需要另行处理 UFS boot blob。
+
+验证方法（刷 SD 后）：
+
+```bash
+# 1) 启动包内不应再有 scp item（解出槽位 0xC00000 起 4 MiB 后解析）
+# 2) 排针 37/32 不再有 115200 的 E902_S_UART1_READY 输出
+# 3) 系统正常启动、网络/GPU 不受影响
+```
+
+---
+
 ## 一、三步开跑
 
 ### 1) clone / fork 本仓库
