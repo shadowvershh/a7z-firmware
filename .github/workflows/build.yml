@@ -39,6 +39,8 @@ env:
   OUT_NAME_UFS: routeA_ubuntu24_a7z_headless_radxa_gpu_nmtui_noscp_wifi_ntp_ufs4096.img
   # 本分支：不编译 SCP、启动包不带 scp item -> boot0 不放开 RISC-V(E902) 核
   SCP_MODE: off
+  # 把排针上真正有的 UART 全部引出来（uart2/3/4 + 尽力启用 s_uart0/s_uart1）
+  A7Z_40PIN_UARTS: "1"
   # UFS 基底 v2：10 GiB，4096 B 逻辑扇区，boot blob @ 字节 1056768，板上已验证。
   # p3 起始字节两种介质相同（332 MiB = 679936 × 512）。
   UFS_BASE_IMG: cache/base-ufs.img

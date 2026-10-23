@@ -106,6 +106,12 @@ if [[ "$SCP_MODE" == "uart1" ]]; then
 else
     echo "    s_uart_config left disabled (no SCP to drive it)"
 fi
+
+# 40-pin UARTs: uart2/uart3/uart4 plus (when the labels exist) s_uart0/s_uart1.
+# Pins/TX-RX come from the official Cubie A7Z 40-pin table.
+if [[ "${A7Z_40PIN_UARTS:-0}" != "0" ]]; then
+    python3 "$REPO/scripts/patch_a7z_40pin_uarts.py" "$DTS_DIR/board.dts" --kernel "$KSRC"
+fi
 # v1.5.0 + gitee BSP 的 linux-6.6 board.dts 没有 USB-C connector 节点
 # (try-power-role 只在 gitee 的 5.15 版) -> 回退到仓库提交的、板上验证过的 sunxi-uart1.dtb
 BUILD_DTB=1
