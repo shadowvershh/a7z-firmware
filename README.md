@@ -4,7 +4,7 @@
 
 产物：Ubuntu 24.04 headless SD 镜像（4 GiB，xz 约 230 MB），包含
 
-- RISC-V **E902/SCP UART1 直出日志**（S-UART1：排针 37/33 脚，115200 8N1）
+- RISC-V **E902/SCP UART1 直出日志**（S-UART1：排针 37/32 脚 = PM4/PM5，115200 8N1）
 - **AIC8800D80 USB WiFi** 驱动 + USB 专用固件
 - **VE 硬件视频引擎 + PowerVR OpenCL/Vulkan**（`libvdecoder`/`libVE`/`libPVROCL`/`libVK_IMG`）
 - **USB-C 口完整可用**：ET7304 TCPC 驱动 + `try-power-role=source`（USB hub / UVC 摄像头 / HDMI 转接器）

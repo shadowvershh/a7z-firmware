@@ -112,6 +112,11 @@ pinout 交叉生成，共 28 个 GPIO 脚。改 DTS 前先查这张表。
 
 ## 4. 完全到不了排针的外设
 
+> **`uart1` 名字有歧义，别搞混**：下表里的 `uart1` 指 **PIO 域** `uart@2501000`
+> （内核 `ttyAS1`，PG6–PG9，调试串口）。排针上的 "UART1" 是 **R 域 S-UART1**
+> `uart@7081000`（即 `s_uart1`，PM3/PM4/PM5 = 脚 33/37/32），见第 2 节。
+> 两者是**不同的硬件单元**，只有后者引到了排针。
+
 `csi0`, `csi1`, `dmic`, `dsi0`, `ir`, `ledc`, `lvds0`, `lvds2`, `lvds3`, `pwm0_3`, `pwm0_4`, `pwm0_5`, `pwm0_6`, `pwm0_7`, `pwm1_8`, `pwm1_9`, `rgmii0`, `rgmii1`, `s_jtag_ms`, `s_pwm0_2`, `s_pwm0_6`, `s_pwm0_7`, `s_pwm0_8`, `s_pwm0_9`, `s_twi0`, `sdc0`, `sdc1`, `sdc2`, `sdc3`, `spi0`, `spi4`, `spif0`, `twi10`, `twi12`, `twi5`, `twi6`, `twi9`, `uart1`, `uart5`, `uart6`
 
 这些只引到了板载器件或专用接口（SD/eMMC/NAND/SPI-Flash/PCIe/CSI/DSI/GMAC/
@@ -123,14 +128,34 @@ pinout 交叉生成，共 28 个 GPIO 脚。改 DTS 前先查这张表。
   `spi2` 的候选脚，一次只能选一组用途。
 - **PD10–PD14 / PD16 / PD17 兼作显示**：`lcd0`、`lvds1`、`dsi1`、`eink` 也走这 7 个
   脚，接屏就全部占用。
-- **脚 32/37（PM5/PM4）**：`uart1`(S-UART1) 构建里被 RISC-V E902 的 SCP 日志占用；
-  `no-riscv-core` 分支关闭该核后才变回普通 GPIO。
+- **脚 32/37（PM5/PM4）**：`s_uart1` 在 `SCP_MODE=uart1` 构建里被 RISC-V E902 的
+  SCP 日志占用（硬件层 mux，Linux 的 pinctrl 看不见，显示为 UNCLAIMED）；
+  `no-riscv-core` 分支关核后才变回普通 GPIO。脚 33（PM3）同为 `s_uart1` 候选，未被占用。
 - **I2S0 全套在排针上**：PB4/PB5/PB6/PB7/PB8 = 脚 36/12/35/40/38
   （MCLK/BCLK/LRCK/DOUT0/DIN0）。
 
-## 6. 结论
+## 6. UART 对照表（哪个 UART 在排针上）
+
+`serialN` 别名取自实机 `/proc/device-tree/aliases/serial*`。**`uart1` 与 `s_uart1`
+是两个不同控制器**，只有 `s_*` 后缀那个在排针上。
+
+| 别名 | 控制器 | pinctrl 名 | 排针可用脚 |
+| --- | --- | --- | --- |
+| `serial0` | `0x2500000` | `uart0` | PB0(脚7), PB9(脚8), PB10(脚10), PB1(脚11) |
+| `serial1` | `0x2501000` | `uart1` | ❌ 无 |
+| `serial2` | `0x2502000` | `uart2` | PJ23(脚3), PJ22(脚5), PB0(脚7), PB1(脚11), PB2(脚29), PB3(脚31) |
+| `serial3` | `0x2503000` | `uart3` | PJ23(脚3), PJ22(脚5), PD14(脚26), PD17(脚27), PD16(脚28) |
+| `serial4` | `0x2504000` | `uart4` | PJ24(脚16), PJ25(脚18) |
+| `serial5` | `0x2505000` | `uart5` | ❌ 无 |
+| `serial6` | `0x2506000` | `uart6` | ❌ 无 |
+| `serial7` | `0x7080000` | `s_uart0` | PL6(脚13), PL7(脚15), PM5(脚32), PM3(脚33), PM4(脚37) |
+| `serial8` | `0x7081000` | `s_uart1` | PM5(脚32), PM3(脚33), PM4(脚37) |
+
+## 7. 结论
 
 **不是所有外设都能塞进 40pin，但常用的都能。** 单看"能不能引出来"：UART、I2C、
-SPI、PWM、I2S0 都在排针上有完整脚位；SD/eMMC/NAND/PCIe/CSI/MIPI/GMAC 以及调试串口
-UART1 没有引出。真正限制来自**脚位重叠**：28 个脚里 PB 组被 5 个外设共用、PD 组被显示
-总线共用，实际可同时使用约 1×UART + 1×I2C + 1×SPI + 1×PWM + 1×I2S（约 15–18 脚）。
+SPI、PWM、I2S0 都在排针上有完整脚位；SD/eMMC/NAND/PCIe/CSI/MIPI/GMAC 以及 PIO 域的
+调试串口 `uart1`（PG6–9）没有引出 —— 但**排针上有 UART：R 域的 `s_uart1`（脚
+32/33/37）和 `s_uart0`（脚 13/15/32/33/37）**，见第 6 节。真正限制来自**脚位重叠**：
+28 个脚里 PB 组被 5 个外设共用、PD 组被显示总线共用，实际可同时使用约
+1×UART + 1×I2C + 1×SPI + 1×PWM + 1×I2S（约 15–18 脚）。

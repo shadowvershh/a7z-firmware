@@ -32,6 +32,20 @@ GND = {6, 9, 14, 20, 25, 30, 34, 39}
 BALL2PIN = {b: p for p, b in HEADER.items()}
 HEADER_BALLS = set(HEADER.values())
 
+# serial alias -> (controller address, pinctrl function name). From the live DT:
+# /proc/device-tree/aliases/serial0..serial8
+UART_ALIASES = [
+    ("serial0", "0x2500000", "uart0"),
+    ("serial1", "0x2501000", "uart1"),
+    ("serial2", "0x2502000", "uart2"),
+    ("serial3", "0x2503000", "uart3"),
+    ("serial4", "0x2504000", "uart4"),
+    ("serial5", "0x2505000", "uart5"),
+    ("serial6", "0x2506000", "uart6"),
+    ("serial7", "0x7080000", "s_uart0"),
+    ("serial8", "0x7081000", "s_uart1"),
+]
+
 FUNC_RE = re.compile(r"^function \d+: (\S+), groups = \[ (.*?) \]$")
 BORING = {"gpio_in", "gpio_out", "irq", "io_disabled", "test", "trace", "clk", "pll"}
 
@@ -132,6 +146,11 @@ def main() -> None:
     add("")
     add("## 4. 完全到不了排针的外设")
     add("")
+    add("> **`uart1` 名字有歧义，别搞混**：下表里的 `uart1` 指 **PIO 域** `uart@2501000`")
+    add("> （内核 `ttyAS1`，PG6–PG9，调试串口）。排针上的 \"UART1\" 是 **R 域 S-UART1**")
+    add("> `uart@7081000`（即 `s_uart1`，PM3/PM4/PM5 = 脚 33/37/32），见第 2 节。")
+    add("> 两者是**不同的硬件单元**，只有后者引到了排针。")
+    add("")
     add("`" + "`, `".join(sorted(none_)) + "`")
     add("")
     add("这些只引到了板载器件或专用接口（SD/eMMC/NAND/SPI-Flash/PCIe/CSI/DSI/GMAC/")
@@ -143,17 +162,34 @@ def main() -> None:
     add("  `spi2` 的候选脚，一次只能选一组用途。")
     add("- **PD10–PD14 / PD16 / PD17 兼作显示**：`lcd0`、`lvds1`、`dsi1`、`eink` 也走这 7 个")
     add("  脚，接屏就全部占用。")
-    add("- **脚 32/37（PM5/PM4）**：`uart1`(S-UART1) 构建里被 RISC-V E902 的 SCP 日志占用；")
-    add("  `no-riscv-core` 分支关闭该核后才变回普通 GPIO。")
+    add("- **脚 32/37（PM5/PM4）**：`s_uart1` 在 `SCP_MODE=uart1` 构建里被 RISC-V E902 的")
+    add("  SCP 日志占用（硬件层 mux，Linux 的 pinctrl 看不见，显示为 UNCLAIMED）；")
+    add("  `no-riscv-core` 分支关核后才变回普通 GPIO。脚 33（PM3）同为 `s_uart1` 候选，未被占用。")
     add("- **I2S0 全套在排针上**：PB4/PB5/PB6/PB7/PB8 = 脚 36/12/35/40/38")
     add("  （MCLK/BCLK/LRCK/DOUT0/DIN0）。")
     add("")
-    add("## 6. 结论")
+    add("## 6. UART 对照表（哪个 UART 在排针上）")
+    add("")
+    add("`serialN` 别名取自实机 `/proc/device-tree/aliases/serial*`。**`uart1` 与 `s_uart1`")
+    add("是两个不同控制器**，只有 `s_*` 后缀那个在排针上。")
+    add("")
+    add("| 别名 | 控制器 | pinctrl 名 | 排针可用脚 |")
+    add("| --- | --- | --- | --- |")
+    for alias, addr, fname in UART_ALIASES:
+        hit = sorted({g for g in funcs.get(fname, []) if g in HEADER_BALLS},
+                     key=lambda b: BALL2PIN[b])
+        pins = ", ".join(f"{b}(脚{BALL2PIN[b]})" for b in hit) or "❌ 无"
+        add(f"| `{alias}` | `{addr}` | `{fname}` | {pins} |")
+
+    add("")
+    add("## 7. 结论")
     add("")
     add("**不是所有外设都能塞进 40pin，但常用的都能。** 单看\"能不能引出来\"：UART、I2C、")
-    add("SPI、PWM、I2S0 都在排针上有完整脚位；SD/eMMC/NAND/PCIe/CSI/MIPI/GMAC 以及调试串口")
-    add("UART1 没有引出。真正限制来自**脚位重叠**：28 个脚里 PB 组被 5 个外设共用、PD 组被显示")
-    add("总线共用，实际可同时使用约 1×UART + 1×I2C + 1×SPI + 1×PWM + 1×I2S（约 15–18 脚）。")
+    add("SPI、PWM、I2S0 都在排针上有完整脚位；SD/eMMC/NAND/PCIe/CSI/MIPI/GMAC 以及 PIO 域的")
+    add("调试串口 `uart1`（PG6–9）没有引出 —— 但**排针上有 UART：R 域的 `s_uart1`（脚")
+    add("32/33/37）和 `s_uart0`（脚 13/15/32/33/37）**，见第 6 节。真正限制来自**脚位重叠**：")
+    add("28 个脚里 PB 组被 5 个外设共用、PD 组被显示总线共用，实际可同时使用约")
+    add("1×UART + 1×I2C + 1×SPI + 1×PWM + 1×I2S（约 15–18 脚）。")
     add("")
 
     open(args.out, "w", encoding="utf-8", newline="\n").write("\n".join(lines))
