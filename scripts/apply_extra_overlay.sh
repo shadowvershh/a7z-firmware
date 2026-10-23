@@ -36,12 +36,12 @@ if [[ -f "$MNT/usr/lib/systemd/system/ntpsec.service" ]]; then
     # also refuse to start on its own once another NTP unit is enabled.
     rm -f "$MNT/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service" \
           "$MNT/etc/systemd/system/dbus-org.freedesktop.timesync1.service"
-    install -d -m 0755 "$MNT/etc/ntpsec"
+    install -d -m 0755 "$MNT/etc/ntpsec" \
+                      "$MNT/var/lib/ntpsec"
     cat > "$MNT/etc/ntpsec/ntp.conf" <<'NTPCONF'
 # A7Z: 中国 NTP 源（无 RTC，开机由 ntpd 校时；时区 Asia/Shanghai）
 driftfile /var/lib/ntpsec/ntp.drift
 leapfile /usr/share/zoneinfo/leap-seconds.list
-statsdir /var/log/ntpsec/
 pool cn.pool.ntp.org iburst
 server ntp.ustc.edu.cn iburst
 server ntp.aliyun.com iburst
