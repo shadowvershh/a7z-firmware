@@ -18,6 +18,11 @@ on:
         type: choice
         options: [auto, release, mega]
         default: auto
+      ufs_scp_stub:
+        description: 'UFS only: 1 = park the RISC-V SCP payload in the base boot blob (default 0 = leave it running)'
+        type: choice
+        options: ['0', '1']
+        default: '0'
   push:
     tags: ['v*']
 
@@ -269,6 +274,16 @@ jobs:
             --dtb dtb/sunxi-uart1.dtb \
             --report out/boot-patch.json
 
+      - name: Park RISC-V SCP payload in the UFS boot blob (optional)
+        if: matrix.target == 'ufs' && inputs.ufs_scp_stub == '1'
+        run: |
+          set -Eeuo pipefail
+          # The UFS boot area is a U-Boot FIT image (no sunxi-package item table),
+          # so the SCP cannot be dropped — it is overwritten in place with WFI.
+          python3 scripts/patch_ufs_scp_stub.py \
+            --image "out/$OUT_NAME" \
+            --report out/ufs-scp-stub.json
+
       - name: Verify
         run: |
           set -Eeuo pipefail
@@ -284,6 +299,9 @@ jobs:
             sudo parted -ms "out/$OUT_NAME" unit s print || true
             sudo losetup -d "$LOOP"
             trap - EXIT
+            if [[ "${{ inputs.ufs_scp_stub }}" == "1" ]]; then
+              python3 scripts/patch_ufs_scp_stub.py --image "out/$OUT_NAME" --verify-only
+            fi
           fi
           sha256sum "out/$OUT_NAME" | tee "out/$OUT_NAME.sha256"
 

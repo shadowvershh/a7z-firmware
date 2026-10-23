@@ -30,9 +30,15 @@
 - 改名：产物是 `boot/boot_package_noscp.fex`，镜像名带 `_noscp_`
 - CI 用 `SCP_MODE=off` 触发；`main` 上默认仍是 `SCP_MODE=uart1`，两者互不影响
 
-**已知限制**：本分支只改写 SD 镜像的启动包槽（`patch_image_boot.py`）。UFS 镜像的
-boot blob 由基底镜像原样带入，其中的 scp 未被移除，因此 **UFS 产物里 RISC-V 核仍是开着的**，
-需要另行处理 UFS boot blob。
+**UFS 那份怎么处理**：UFS 的引导区不是 `sunxi-package`，而是 U-Boot **FIT 镜像**
+（`/images/scp` 子镜像内联 122056 字节 SCP，偏移 2403456，FIT 里**没有 hash 节点**），
+没有 item 表可删，所以改成**原地填 `wfi`**（`0x10500073` × 30514）把核停住。
+
+- 默认**关闭**：`workflow_dispatch` 的 `ufs_scp_stub` 选项选 `0` 时 UFS 产物保持原样（核仍运行）
+- 选 `1` 时执行 `scripts/patch_ufs_scp_stub.py`，并在 Verify 步骤断言该区域已全是 WFI
+- 语义差异：SD 是"包里没有 scp"（核留复位），UFS 是"有 scp 但内容被换成 WFI"（核被停住，
+  仍在时钟域内）——两者都能让 SCP 不再运行，但不是同一种机制
+- 脚本对该区域的 sha256 做了前置校验（`8DE05624…`），基底布局不符会直接失败而不是盲改
 
 验证方法（刷 SD 后）：
 
