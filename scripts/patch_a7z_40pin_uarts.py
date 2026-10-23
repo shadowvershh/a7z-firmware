@@ -36,11 +36,11 @@ PIO_UARTS = [
     ("uart4", "PJ24", "PJ25", "TX=脚16 RX=脚18"),
 ]
 
-# R-domain: S-UART0 TX=PL6/RX=PL7, S-UART1 TX=PM4/RX=PM3 (official table;
-# note S-UART1-RX is PM3, not PM5).
+# R-domain: S-UART0 TX=PL6/RX=PL7, S-UART1 TX=PM4/RX=PM5 (the official table
+# also allows PM3 as S-UART1-RX; PM4/PM5 keeps the existing SCP pin choice).
 R_UARTS = [
     ("s_uart0", ["s_uart0", "r_uart0"], "PL6", "PL7", "TX=脚13 RX=脚15"),
-    ("s_uart1", ["s_uart1", "r_uart1"], "PM4", "PM3", "TX=脚37 RX=脚33"),
+    ("s_uart1", ["s_uart1", "r_uart1"], "PM4", "PM5", "TX=脚37 RX=脚32"),
 ]
 
 
