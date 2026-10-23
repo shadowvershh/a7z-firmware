@@ -80,7 +80,7 @@ def build_package(
     package_blob = package_path.read_bytes()
     if not 0 < len(package_blob) <= SLOT_SIZE:
         raise ValueError(f"rebuilt boot package does not fit the A7Z slot: {len(package_blob)} bytes")
-    new_items = parse_items(package_blob)
+    new_items = parse_items(package_blob, expected=None)
     new_payloads = {
         name: package_blob[offset : offset + size]
         for name, offset, size in new_items

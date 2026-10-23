@@ -119,9 +119,10 @@ def main() -> None:
     if args.keep_jtag:
         skipped.append("uart2 (PB0/PB1) 跳过：保留 JTAG")
     for node, func, tx, rx, where in R_UARTS:
+        # Node labels are verified against the pinned SDK; if a future SDK
+        # drops them, dtc will fail loudly instead of us silently skipping.
         if args.kernel is not None and not label_defined(args.kernel, node):
-            skipped.append(f"{node}({tx},{rx}) 跳过：kernel 源码里找不到 {node} 节点")
-            continue
+            skipped.append(f"WARNING: {node} 未在 kernel 源码中找到，仍会生成（dtc 会报错）")
         r_pins += [
             f"\t{func}_pins: {func}@0 {{",
             f'\t\tpins = "{tx}", "{rx}";',
