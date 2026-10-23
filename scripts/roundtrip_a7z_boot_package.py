@@ -20,12 +20,20 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest().upper()
 
 
-def parse_items(blob: bytes) -> list[tuple[str, int, int]]:
+def parse_items(blob: bytes, expected: tuple[str, ...] | None = EXPECTED_ITEMS) -> list[tuple[str, int, int]]:
+    """Parse the item table.
+
+    ``expected`` is the exact item list to require (default: the pinned
+    3-item baseline).  Pass ``None`` to accept whatever the package has,
+    which is what the SCP-less repack needs.
+    """
     if blob[:13] != b"sunxi-package":
         raise ValueError("unexpected Allwinner boot-package magic")
     count = struct.unpack_from("<I", blob, 0x20)[0]
-    if count != len(EXPECTED_ITEMS):
-        raise ValueError(f"expected 3 package items, found {count}")
+    if count == 0 or count > 16:
+        raise ValueError(f"implausible package item count: {count}")
+    if expected is not None and count != len(expected):
+        raise ValueError(f"expected {len(expected)} package items, found {count}")
     items = []
     for index in range(count):
         record = ITEM_TABLE_OFFSET + index * ITEM_RECORD_SIZE
@@ -38,7 +46,7 @@ def parse_items(blob: bytes) -> list[tuple[str, int, int]]:
         if not size or offset < ITEM_TABLE_OFFSET + count * ITEM_RECORD_SIZE or offset + size > len(blob):
             raise ValueError(f"invalid bounds for package item {name}")
         items.append((name, offset, size))
-    if tuple(item[0] for item in items) != EXPECTED_ITEMS:
+    if expected is not None and tuple(item[0] for item in items) != expected:
         raise ValueError(f"unexpected package items: {items}")
     intervals = sorted((offset, offset + size) for _, offset, size in items)
     if any(left[1] > right[0] for left, right in zip(intervals, intervals[1:])):

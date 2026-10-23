@@ -12,6 +12,14 @@ set -Eeuo pipefail
 SDK=${1:?usage: build-sdk-parts.sh /path/to/tina-sdk}
 REPO=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 WORK=${WORK_DIR:-$PWD/sdk-parts-work}
+# uart1 = build the E902/SCP firmware and pack it into the boot package
+# off   = do not build SCP and drop the scp item, so boot0 leaves the RISC-V
+#         core in reset (no S-UART1 log on the 40-pin header)
+SCP_MODE=${SCP_MODE:-uart1}
+case "$SCP_MODE" in
+    uart1|off) ;;
+    *) echo "ERROR: SCP_MODE must be 'uart1' or 'off' (got '$SCP_MODE')" >&2; exit 1 ;;
+esac
 
 ARISC_SRC="$SDK/brandy/arisc/ar100s"
 KSRC="$SDK/kernel/linux-6.6"
@@ -33,6 +41,8 @@ done
 mkdir -p "$WORK" "$REPO/boot" "$REPO/dtb" "$REPO/overlay/usr/lib/modules/6.6.98"
 
 # ---------------------------------------------------------------- 1) ARISC/SCP
+SCP_BIN=""
+if [[ "$SCP_MODE" == "uart1" ]]; then
 echo "==> [1/6] ARISC/SCP (UART1)"
 mkdir -p "$WORK/arisc/brandy/arisc" "$WORK/arisc/device/config/chips/a733/configs"
 rm -rf "$WORK/arisc/brandy/arisc/ar100s" "$WORK/arisc/device/config/chips/a733/configs/cubie_a7z"
@@ -49,6 +59,9 @@ SCP_BIN="$WORK/arisc/brandy/arisc/ar100s/scp.bin"
 strings -a "$SCP_BIN" | grep -q 'E902_S_UART1_READY baud=115200' \
   || { echo "ERROR: SCP marker missing"; exit 1; }
 echo "    scp.bin: $(stat -c %s "$SCP_BIN") bytes"
+else
+echo "==> [1/6] ARISC/SCP skipped (SCP_MODE=off -> RISC-V core stays in reset)"
+fi
 
 # ------------------------------------------------------- 2) boot package repack
 echo "==> [2/6] repack boot package"
@@ -68,17 +81,37 @@ if [[ -z "$BASELINE_PKG" ]]; then
 fi
 [[ -f "$BASELINE_PKG" ]] || { echo "ERROR: baseline boot package not found (set BASELINE_BOOT_PACKAGE)"; exit 1; }
 rm -rf "$WORK/package"
-python3 "$REPO/scripts/build_a7z_uart1_boot_package.py" \
-    "$BASELINE_PKG" "$PACK_TOOLS" "$SCP_BIN" "$WORK/package"
-cp -f "$WORK/package/boot_package_uart1.fex" "$REPO/boot/boot_package_uart1.fex"
-echo "    boot package: $(stat -c %s "$REPO/boot/boot_package_uart1.fex") bytes"
+if [[ "$SCP_MODE" == "uart1" ]]; then
+    python3 "$REPO/scripts/build_a7z_uart1_boot_package.py" \
+        "$BASELINE_PKG" "$PACK_TOOLS" "$WORK/package" --scp "$SCP_BIN"
+    OUT_PKG="$REPO/boot/boot_package_uart1.fex"
+    cp -f "$WORK/package/boot_package_uart1.fex" "$OUT_PKG"
+else
+    # --drop-scp: no scp item in the package => boot0 never de-asserts the
+    # RISC-V (E902/ARISC) reset, so the core stays off.
+    python3 "$REPO/scripts/build_a7z_uart1_boot_package.py" \
+        "$BASELINE_PKG" "$PACK_TOOLS" "$WORK/package" --drop-scp
+    OUT_PKG="$REPO/boot/boot_package_noscp.fex"
+    cp -f "$WORK/package/boot_package_noscp.fex" "$OUT_PKG"
+fi
+echo "    boot package: $OUT_PKG ($(stat -c %s "$OUT_PKG") bytes)"
 
 # ------------------------------------------------------------------- 3) DTB
-echo "==> [3/6] DTB (S-UART1 pins)"
+echo "==> [3/6] DTB ($([[ "$SCP_MODE" == "uart1" ]] && echo 'S-UART1 pins' || echo 'stock arisc pins, no SCP'))"
 DTS_DIR="$WORK/dts"
 rm -rf "$DTS_DIR"; mkdir -p "$DTS_DIR"
 cp -a "$BOARD/linux-6.6/board.dts" "$DTS_DIR/board.dts"
-python3 "$REPO/scripts/patch_a7z_uart1_dts.py" "$DTS_DIR/board.dts"
+if [[ "$SCP_MODE" == "uart1" ]]; then
+    python3 "$REPO/scripts/patch_a7z_uart1_dts.py" "$DTS_DIR/board.dts"
+else
+    echo "    s_uart_config left disabled (no SCP to drive it)"
+fi
+
+# 40-pin UARTs: uart2/uart3/uart4 plus (when the labels exist) s_uart0/s_uart1.
+# Pins/TX-RX come from the official Cubie A7Z 40-pin table.
+if [[ "${A7Z_40PIN_UARTS:-0}" != "0" ]]; then
+    python3 "$REPO/scripts/patch_a7z_40pin_uarts.py" "$DTS_DIR/board.dts" --kernel "$KSRC"
+fi
 # v1.5.0 + gitee BSP 的 linux-6.6 board.dts 没有 USB-C connector 节点
 # (try-power-role 只在 gitee 的 5.15 版) -> 回退到仓库提交的、板上验证过的 sunxi-uart1.dtb
 BUILD_DTB=1
