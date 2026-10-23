@@ -8,8 +8,8 @@ Pins and TX/RX direction follow the official Cubie A7Z 40-pin table
   uart2   TX PB0(7)  RX PB1(11)    2-wire, so PB2/PB3 keep JTAG
   uart3   TX PJ22(5) RX PJ23(3)    2-wire
   uart4   TX PJ24(16) RX PJ25(18)  2-wire
-  s_uart0 TX PL6(13) RX PL7(15)    R-domain, only if the label exists
-  s_uart1 TX PM4(37) RX PM5(32)    R-domain, only if the label exists
+  s_uart0 -> node uart7  TX PL6(13) RX PL7(15)   R-domain
+  s_uart1 -> node uart8  TX PM4(37) RX PM5(32)   R-domain
 
 uart1/uart5/uart6 are NOT touched: the official table does not list them on
 the header, and none of their pins (PG6-PG9 / PF,PG,PH,PI,PJ16-19 / PE,PI,PK)
@@ -36,11 +36,15 @@ PIO_UARTS = [
     ("uart4", "PJ24", "PJ25", "TX=脚16 RX=脚18"),
 ]
 
-# R-domain: S-UART0 TX=PL6/RX=PL7, S-UART1 TX=PM4/RX=PM5 (the official table
-# also allows PM3 as S-UART1-RX; PM4/PM5 keeps the existing SCP pin choice).
+# R-domain UARTs.  Verified against the pinned SDK (bsp/configs/linux-6.6/
+# sun60iw2p1.dtsi): the nodes are labelled uart7 (0x7080000 = R_UART0) and
+# uart8 (0x7081000 = R_UART1); "s_uart0"/"s_uart1" are the *pinctrl function*
+# names, not the node labels.  TX/RX per the official 40-pin table.
+#   uart7: TX PL6 (脚13) RX PL7 (脚15)
+#   uart8: TX PM4 (脚37) RX PM5 (脚32)   [PM3 also works as RX]
 R_UARTS = [
-    ("s_uart0", ["s_uart0", "r_uart0"], "PL6", "PL7", "TX=脚13 RX=脚15"),
-    ("s_uart1", ["s_uart1", "r_uart1"], "PM4", "PM5", "TX=脚37 RX=脚32"),
+    ("uart7", "s_uart0", "PL6", "PL7", "TX=脚13 RX=脚15"),
+    ("uart8", "s_uart1", "PM4", "PM5", "TX=脚37 RX=脚32"),
 ]
 
 
@@ -107,35 +111,32 @@ def main() -> None:
         ]
         emitted.append(f"{name}({tx},{rx}) -> {where}")
 
-    # R-domain UARTs: their nodes only exist in the SoC dtsi.
+    # R-domain UARTs: node labels (uart7/uart8) come from the SoC dtsi, the
+    # pinctrl *function* names are s_uart0/s_uart1.
     r_pins = []
     r_nodes = []
-    for name, cands, tx, rx, where in R_UARTS:
-        lab = pick(args.kernel, cands)
-        if not lab:
+    skipped = []
+    if args.keep_jtag:
+        skipped.append("uart2 (PB0/PB1) 跳过：保留 JTAG")
+    for node, func, tx, rx, where in R_UARTS:
+        if args.kernel is not None and not label_defined(args.kernel, node):
+            skipped.append(f"{node}({tx},{rx}) 跳过：kernel 源码里找不到 {node} 节点")
             continue
         r_pins += [
-            f"\t{name}_pins: {name}@0 {{",
+            f"\t{func}_pins: {func}@0 {{",
             f'\t\tpins = "{tx}", "{rx}";',
-            f'\t\tfunction = "{name}";',
+            f'\t\tfunction = "{func}";',
             "\t\tdrive-strength = <10>;",
             "\t};",
         ]
         r_nodes += [
-            f"&{lab} {{",
+            f"&{node} {{",
             '\tpinctrl-names = "default";',
-            f"\tpinctrl-0 = <&{name}_pins>;",
+            f"\tpinctrl-0 = <&{func}_pins>;",
             '\tstatus = "okay";',
             "};",
         ]
-        emitted.append(f"{lab}({tx},{rx}) -> {where}")
-
-    skipped = []
-    if args.keep_jtag:
-        skipped.append("uart2 (PB0/PB1) 跳过：保留 JTAG")
-    for name, cands, tx, rx, where in R_UARTS:
-        if pick(args.kernel, cands) is None:
-            skipped.append(f"{name}({tx},{rx}) 跳过：kernel 源码里找不到 label")
+        emitted.append(f"{node}/{func}({tx},{rx}) -> {where}")
 
     if r_pins:
         out += ["&r_pio {"] + r_pins + ["};", ""]
