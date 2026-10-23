@@ -9,7 +9,7 @@ Pins and TX/RX direction follow the official Cubie A7Z 40-pin table
   uart3   TX PJ22(5) RX PJ23(3)    2-wire
   uart4   TX PJ24(16) RX PJ25(18)  2-wire
   s_uart0 TX PL6(13) RX PL7(15)    R-domain, only if the label exists
-  s_uart1 TX PM4(37) RX PM3(33)    R-domain, only if the label exists
+  s_uart1 TX PM4(37) RX PM5(32)    R-domain, only if the label exists
 
 uart1/uart5/uart6 are NOT touched: the official table does not list them on
 the header, and none of their pins (PG6-PG9 / PF,PG,PH,PI,PJ16-19 / PE,PI,PK)
